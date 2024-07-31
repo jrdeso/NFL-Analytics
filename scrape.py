@@ -43,10 +43,11 @@ def get_players():
             (players_df['team'].notna())
         ]
 
-        # For recording data to excel
-        excel_path = 'Excel Exports/nfl_players.xlsx'
-        players_df.to_excel(excel_path, index=False, engine='openpyxl')
+        # # For recording data to excel
+        # excel_path = 'Excel Exports/nfl_players.xlsx'
+        # players_df.to_excel(excel_path, index=False, engine='openpyxl')
 
+        log.info(f"Successfully scraped players dataframe from Sleeper: {players_url}")
         return players_df
         
     except requests.exceptions.RequestException as e:
