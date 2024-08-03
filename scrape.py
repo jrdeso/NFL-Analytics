@@ -42,7 +42,7 @@ class Scrape:
         Examples:
             >>> scraper = Scrape()
             >>> df = scraper.scrape_players()
-            >>> print(df.head())
+            >>> print(df.head(1))
             playerID espnName pos team teamID height weight age exp school jerseyNum injury.designation injury.injDate injury.description
             12345 John Doe QB NE 1 6'4" 230 28 5 CollegeA 12 Questionable 20230810 Shoulder Injury
         """
@@ -50,11 +50,10 @@ class Scrape:
 
         try: 
             self.endpoint = "getNFLPlayerList"
-            query = self.api_base_url + self.endpoint + self.params
+            query = self.api_base_url + self.endpoint
             # get response and convert to pd dataframe
-            response = requests.get(query, headers=self.headers).json()
-            # data = response.json()
-            data = response.get('body', {})
+            response = requests.get(query, headers=self.headers, params=self.params)
+            data = response.json().get('body', {})
             players_df = pd.json_normalize(data)
 
             # Filter dataframe for desired fields and positions (only NFL skill players)
