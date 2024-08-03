@@ -4,57 +4,91 @@ import datetime
 from log_helper import NFL_Logging
 import os
 import inspect
+from dotenv import load_dotenv
 
 log = NFL_Logging()
 
-def get_players():
-    log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
+class Scrape:
 
-    players_url = "https://api.sleeper.app/v1/players/nfl"
-    
-    try:
-        response = requests.get(players_url)
-        response.raise_for_status()  # Will raise an HTTPError for bad responses
-        players_data = response.json()
-        players_df = pd.DataFrame.from_dict(players_data, orient='index')
+    def __init__(self):
+        """
+        Initializes the Scrape class with API credentials and base URL.
+        """
+        load_dotenv()
+        self.log = NFL_Logging()
+        self.api_base_url = "https://tank01-nfl-live-in-game-real-time-statistics-nfl.p.rapidapi.com/"
+        self.headers = {'x-rapidapi-key': os.getenv('API_KEY')}
+        self.endpoint = ""
+        self.params = ""
 
-        # Filter for active players:
-        players_df = players_df[(players_df['status'] == 'Active')]
 
-        # Filter DF columns
-        filtered_columns = [
-            'player_id',
-            'first_name',
-            'last_name',
-            'team',
-            'age',
-            'position',
-            'depth_chart_order',
-            'injury_status',
-            'injury_body_part',
-            'injury_notes'
-        ]
-        players_df = players_df[filtered_columns]
+    def scrape_players(self):
+        """
+        Scrapes player data from the NFL API and returns it as a pandas DataFrame.
 
-        # Filter for skill positions and filter out Inactive players
-        positions_to_include = ['QB', 'RB', 'TE', 'WR']
-        players_df = players_df[
-            (players_df['position'].isin(positions_to_include)) & 
-            (players_df['team'].notna())
-        ]
+        This method sends a GET request to the NFL API to retrieve a list of players. 
+        It then filters the data to include only NFL skill players (QB, RB, TE, WR) 
+        and returns a DataFrame with relevant player details.
 
-        # # For recording data to excel
-        # excel_path = 'Excel Exports/nfl_players.xlsx'
-        # players_df.to_excel(excel_path, index=False, engine='openpyxl')
+        Returns:
+            pandas.DataFrame: A DataFrame containing information about NFL skill players, 
+                              including fields such as player ID, name, position, team, 
+                              height, weight, age, experience, college, jersey number, 
+                              and injury details.
 
-        log.info(f"Successfully scraped players dataframe from Sleeper: {players_url}")
-        return players_df
-        
-    except requests.exceptions.RequestException as e:
-        log.critical(f"Failed to retrieve data at {players_url}: {str(e)}")
+        Raises:
+            requests.exceptions.RequestException: If the API request fails or there is an error in retrieving data.
+
+        Examples:
+            >>> scraper = Scrape()
+            >>> df = scraper.scrape_players()
+            >>> print(df.head())
+            playerID espnName pos team teamID height weight age exp school jerseyNum injury.designation injury.injDate injury.description
+            12345 John Doe QB NE 1 6'4" 230 28 5 CollegeA 12 Questionable 20230810 Shoulder Injury
+        """
+        self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
+
+        try: 
+            self.endpoint = "getNFLPlayerList"
+            query = self.api_base_url + self.endpoint + self.params
+            # get response and convert to pd dataframe
+            response = requests.get(query, headers=self.headers).json()
+            # data = response.json()
+            data = response.get('body', {})
+            players_df = pd.json_normalize(data)
+
+            # Filter dataframe for desired fields and positions (only NFL skill players)
+            filtered_fields = [
+                'playerID',             # ESPN player ID > Carrying over to DB
+                'espnName',             # Name of player
+                'pos',                  # Player's position (e.g., QB, RB, WR, TE)
+                'team',                 # NFL Team (Abbreviated)
+                'teamID',               # NFL Team ID > Carrying over to DB
+                'height',               # Player's height
+                'weight',               # Player's weight
+                'age',                  # Player's age
+                'exp',                  # Number of years player has been in league ('R' for Rookies)
+                'school',               # Player's college
+                'jerseyNum',            # Player's jersey number
+                'injury.designation',   # Player's injury designation (e.g., 'Questionable')
+                'injury.injDate',       # Date of Player's injury (formatted as '20230810')
+                'injury.description',   # Text description of Player's injury
+            ]
+
+            skill_positions = ['QB', 'RB', 'TE', 'WR']
+            players_df = players_df[filtered_fields]
+            players_df = players_df[players_df['pos'].isin(skill_positions)]
+
+            self.log.info(f"Successfully scraped players dataframe from: {query}")
+            return players_df
+
+        except requests.exceptions.RequestException as e:
+            self.log.critical(f"Failed to retrieve data at {query}: {str(e)}")
+
 
 def main():
-    df = get_players()
+    scrape = Scrape()
+    df = scrape.scrape_players()
     print(df.head())
 
 main()
