@@ -54,6 +54,7 @@ def get_players():
         log.critical(f"Failed to retrieve data at {players_url}: {str(e)}")
 
 def main():
-    get_players()
+    df = get_players()
+    print(df.head())
 
 main()

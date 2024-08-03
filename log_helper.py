@@ -12,7 +12,7 @@ class NFL_Logging:
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
     def label_log(self, script_name, function_name):
-        logging.info(f"{self.get_timestamp()}: Starting: {script_name} -> [{function_name}]")
+        logging.info(f"{self.get_timestamp()}: Starting: {script_name}: [{function_name}]")
 
     def info(self, message):
         logging.info(f"{self.get_timestamp()}: {message}")
