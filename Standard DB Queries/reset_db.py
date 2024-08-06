@@ -2,7 +2,7 @@ import sqlite3
 
 def main():
     # Connect to the SQLite database
-    conn = sqlite3.connect('..\\NBA_DB.db')
+    conn = sqlite3.connect('..\\nfl_fantasy.db')
     cursor = conn.cursor()
 
     delete_current_data(conn, cursor)
