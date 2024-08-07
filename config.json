@@ -243,5 +243,41 @@
         "Rushing.rushTD",
         "Rushing.rushYds",
         "Rushing.rushingTwoPointConversion"
-    ]
+    ],
+
+
+    "players_df_to_player_table_map": {
+        "playerID": "PLAYER_ID",
+        "espnName": "FULL_NAME",
+        "pos": "POSITION",
+        "team": "TEAM_ABBR",
+        "teamID": "TEAM_ID",
+        "height": "HEIGHT",
+        "weight": "WEIGHT",
+        "age": "AGE",
+        "exp": "EXPERIENCE",
+        "school": "COLLEGE",
+        "jerseyNum": "JERSEY_NUMBER",
+        "injury.designation": "INJURY_DESIGNATION",
+        "injury.injDate": "INJURY_DATE",
+        "injury.description": "INJURY_DESCRIPTION"
+    },
+
+    "players_df_to_player_table_datatypes": {
+        "PLAYER_ID": "INTEGER",
+        "FULL_NAME": "TEXT",
+        "POSITION": "TEXT",
+        "TEAM_ABBR": "TEXT",
+        "TEAM_ID": "INTEGER",
+        "HEIGHT": "TEXT",
+        "WEIGHT": "INTEGER",
+        "AGE": "INTEGER",
+        "EXPERIENCE": "TEXT",
+        "COLLEGE": "TEXT",
+        "JERSEY_NUMBER": "INTEGER",
+        "INJURY_DESIGNATION": "TEXT",
+        "INJURY_DATE": "TEXT",
+        "INJURY_DESCRIPTION": "TEXT"
+    }
+
 }
