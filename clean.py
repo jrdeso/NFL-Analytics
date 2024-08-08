@@ -5,8 +5,17 @@ import os
 import inspect
 
 class Clean:
+    """
+    Class used to clean and organize NFL game data for insertion into a local database.
+    """
 
     def __init__(self):
+        """
+        Initializes the Clean class.
+
+        Loads configuration settings from 'config.json' to initialize filtering lists, renaming maps, and data type mappings
+        used for cleaning and organizing NFL game data.
+        """
         self.log = NFL_Logging()
         # Open config.json file to reference defined dataframe structure
         # (Put defined lists/dicts in config.json to declutter files)
@@ -22,14 +31,29 @@ class Clean:
         self.player_stat_columns = config['player_stat_columns']                # To identify fields related particularly to player stats
         
         # Maps from extracted/cleaned table dataframe to corresponding columns in SQL Table
-        self.players_df_to_player_table_map = config['players_df_to_player_table_map']   
+        self.players_df_to_player_table_map = config['players_df_to_player_table_map']
+        self.game_data_df_to_game_table_map = config['game_data_df_to_game_table_map']   
 
 
         # Maps dataframe types to correct SQL datatypes for each table
         self.players_df_to_player_table_datatypes = config['players_df_to_player_table_datatypes']
+        self.game_data_df_to_game_table_datatypes = config['game_data_df_to_game_table_datatypes']
 
 
     def organize_game_info_df(self, game_info_df):
+        """
+        Splits a game DataFrame into four separate DataFrames: general game info, home team info, away team info, and player info.
+
+        Parameters
+        ----------
+        game_info_df : DataFrame
+            The DataFrame containing raw game data.
+
+        Returns
+        -------
+        tuple of DataFrames
+            A tuple containing four DataFrames: game_data_df, home_team_data_df, away_team_data_df, and players_stats_df.
+        """
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
 
         # Extract general game info 
@@ -97,6 +121,22 @@ class Clean:
     
 
     def clean_players(self, players_df):
+        """
+        Cleans the players DataFrame (NFL Players, no stats included) by renaming columns and converting data types.
+
+        This method renames the columns according to the mapping provided in the configuration and converts the data types 
+        to match the SQL schema for insertion into the database.
+
+        Parameters
+        ----------
+        players_df : DataFrame
+            The DataFrame containing player data to be cleaned.
+
+        Returns
+        -------
+        DataFrame
+            The cleaned DataFrame ready for database insertion.
+        """
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
 
         # Rename columns for SQL Player table
@@ -113,8 +153,30 @@ class Clean:
         return players_df
 
 
+    def clean_game(self, game_data_df):
+        self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
+
+
+
 
     def convert_column_types(self, df, column_types):
+        """
+        Converts the data types of specified columns in a DataFrame to match given SQL data types.
+
+        Handles conversion to INTEGER, REAL, and TEXT types, with error handling and logging for each conversion.
+
+        Parameters
+        ----------
+        df : DataFrame
+            The DataFrame containing columns to be converted.
+        column_types : dict
+            A dictionary mapping DataFrame columns to their respective SQL data types.
+
+        Returns
+        -------
+        DataFrame
+            The DataFrame with columns converted to the specified data types.
+        """
         for column, sql_type in column_types.items():
             try:
                 if sql_type == "INTEGER":
@@ -128,3 +190,26 @@ class Clean:
             except Exception as e:
                 self.log.critical(f"Error converting column {column} to {sql_type}: {e}")
         return df
+
+
+    def format_date(date_str):
+        """
+        Converts a date string from 'YYYYMMDD' format to 'MM-DD-YYYY' format.
+
+        Parameters:
+        date_str (str): A string representing a date in 'YYYYMMDD' format.
+
+        Returns:
+        str: A string representing the date in 'MM-DD-YYYY' format.
+
+        Example:
+        >>> format_date('20220804')
+        '08-04-2022'
+        """
+        # Extract year, month, and day from the input string
+        year = date_str[:4]
+        month = date_str[4:6]
+        day = date_str[6:]
+
+        # Return the date in MM-DD-YYYY format
+        return f"{month}-{day}-{year}"

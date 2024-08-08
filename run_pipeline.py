@@ -35,33 +35,45 @@ def run_pipeline(year=None):
     # save_df(players_df, 'players_df')
     players_df = load_df('players_df')
     players_df = cleaner.clean_players(players_df)
-    print(players_df.head())
-    print(players_df.dtypes)
+    # print(players_df.head())
+    # print(players_df.dtypes)
 
-    """ Scrape 2022 Schedule """
-    # nfl_schedule_2022 = scraper.scrape_nfl_schedule(2022)
-    # save_df(nfl_schedule_2022, 'nfl_schedule_2022')
+    # """ Scrape 2022 Schedule """
+    # # nfl_schedule_2022 = scraper.scrape_nfl_schedule(2022)
+    # # save_df(nfl_schedule_2022, 'nfl_schedule_2022')
     nfl_schedule_2022 = load_df('nfl_schedule_2022')
     games_list = nfl_schedule_2022['gameID'].tolist()
 
-    # Put all season's game IDs in a list
+    # # Put all season's game IDs in a list
 
 
-    """ Scrape game info for 2022 Games """
-    # Note : SHOULD NOT STORE ALL GAMES INTO ONE DATAFRAME. 
-    # Do to the nature of the API every player gets set of their own fieldnames for each of their stats. 
-    # Combining all players games for a whole season gets messy real quick.
-    # E.g., ended up with a final dataframe with 47,000+ columns. 
-    ## >> Process each game individually, game data, team data, player data. 
+    # """ Scrape game info for 2022 Games """
+    # # Note : SHOULD NOT STORE ALL GAMES INTO ONE DATAFRAME. 
+    # # Do to the nature of the API every player gets set of their own fieldnames for each of their stats. 
+    # # Combining all players games for a whole season gets messy real quick.
+    # # E.g., ended up with a final dataframe with 47,000+ columns. 
+    # ## >> Process each game individually, game data, team data, player data. 
     # for game in games_list:
     #     # Scrape individual game info
     #     game_info_df = scraper.scrape_game_info(game)
 
     #     if game_info_df is not None:
+    #         # Organize each game into their separate dataframes
     #         game_data_df, home_team_data_df, away_team_data_df, players_stats_df = cleaner.organize_game_info_df(game_info_df)
-    #         print(game_data_df.head())
-
+            
+    #         # Scrape game time into game_data_df (originally not included)
+    #         game_data_df['gameTime'] = scraper.scrape_game_time(game_data_df['gameID'])
+            
+    #         save_df(game_data_df, 'game_data_df')
+    #         save_df(home_team_data_df, 'home_team_data_df')
+    #         save_df(away_team_data_df, 'away_team_data_df')
+    #         save_df(players_stats_df, 'players_stats_df')
     #     break
+
+    game_data_df = load_df('game_data_df')
+    game_data_df['gameTime'] = scraper.scrape_game_time(game_data_df['gameID'].iloc[0])
+    print(game_data_df.head())
+    print(game_data_df.dtypes)
 
 
 

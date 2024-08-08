@@ -189,3 +189,46 @@ class Scrape:
         except requests.exceptions.RequestException as e:
             self.log.critical(f"Failed to retrieve data at {query}: {str(e)}")
 
+
+    def scrape_game_time(self, game_id):
+        """
+        Scrapes the start time of a specific NFL game from the NFL API.
+
+        This method sends a GET request to the NFL API to retrieve the start time for the specified game.
+        The start time is extracted from the response and returned.
+
+        Args:
+            game_id (str): The game ID for which to retrieve the start time.
+
+        Returns:
+            str: The start time of the specified NFL game, formatted without the 'p' character.
+
+        Raises:
+            requests.exceptions.RequestException: If the API request fails or there is an error in retrieving data.
+
+        Examples:
+            >>> scraper = Scrape()
+            >>> game_time = scraper.scrape_game_time("20220804_JAX@LV")
+            >>> print(game_time)
+            "8:00"
+        """
+        self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
+        try:
+            self.endpoint = "getNFLScoresOnly"
+            query = self.api_base_url + self.endpoint
+            self.params = {
+                "gameID": game_id,
+                'topPerformers': "false"
+            }
+            # get response and convert to pd dataframe
+            response = requests.get(query, headers=self.headers, params=self.params)
+            data = response.json().get('body', {})
+            temp_df = pd.json_normalize(data)
+            game_time = temp_df[game_id+'.gameTime'].iloc[0].strip('p')
+
+            # return scraped and filtered dataframe
+            self.log.info(f"Successfully scraped [{game_id}] start time from: {query}")
+            return game_time
+        
+        except requests.exceptions.RequestException as e:
+            self.log.critical(f"Failed to retrieve data at {query}: {str(e)}")

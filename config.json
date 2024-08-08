@@ -278,6 +278,47 @@
         "INJURY_DESIGNATION": "TEXT",
         "INJURY_DATE": "TEXT",
         "INJURY_DESCRIPTION": "TEXT"
+    },
+
+
+    "game_data_df_to_game_table_map": {
+        "gameID": "GAME_ID",
+        "gameDate": "GAME_DATE",
+        "seasonType": "GAME_TYPE",
+        "home": "HOME_TEAM",
+        "teamIDHome": "HOME_TEAM_ID",
+        "homePts": "HOME_POINTS",
+        "homeResult": "HOME_RESULT",
+        "away": "AWAY_TEAM",
+        "teamIDAway": "AWAY_TEAM_ID",
+        "awayPts": "AWAY_POINTS",
+        "awayResult": "AWAY_RESULT",
+
+        "a": "WINNING_TEAM_ID",
+        "b": "SEASON_ID",
+        "c": "GAME_TIME",
+        "d": "PRIMETIME",
+        "e": "WEATHER"
+    },
+
+    "game_data_df_to_game_table_datatypes": {
+        "GAME_ID": "TEXT",
+        "GAME_DATE": "TEXT",
+        "GAME_TYPE": "TEXT",
+        "HOME_TEAM": "TEXT",
+        "HOME_TEAM_ID": "INTEGER",
+        "HOME_POINTS": "INTEGER",
+        "HOME_RESULT": "TEXT",
+        "AWAY_TEAM": "TEXT",
+        "AWAY_TEAM_ID": "INTEGER",
+        "AWAY_POINTS": "INTEGER",
+        "AWAY_RESULT": "TEXT",
+        
+        "WINNING_TEAM_ID": "INTEGER",
+        "SEASON_ID": "TEXT",
+        "GAME_TIME": "TEXT",
+        "PRIMETIME": "TEXT",
+        "WEATHER": "TEXT"
     }
 
 }
