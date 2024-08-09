@@ -34,11 +34,13 @@ class Clean:
         # Maps from extracted/cleaned table dataframe to corresponding columns in SQL Table
         self.players_df_to_player_table_map = config['players_df_to_player_table_map']
         self.game_data_df_to_game_table_map = config['game_data_df_to_game_table_map']   
+        self.team_game_df_to_team_game_table_map = config['team_game_df_to_team_game_table_map']   
 
 
         # Maps dataframe types to correct SQL datatypes for each table
         self.players_df_to_player_table_datatypes = config['players_df_to_player_table_datatypes']
         self.game_data_df_to_game_table_datatypes = config['game_data_df_to_game_table_datatypes']
+        self.team_game_df_to_team_game_table_datatypes = config['team_game_df_to_team_game_table_datatypes']   
 
 
     def organize_game_info_df(self, game_info_df):
@@ -125,9 +127,6 @@ class Clean:
         """
         Cleans the players DataFrame (NFL Players, no stats included) by renaming columns and converting data types.
 
-        This method renames the columns according to the mapping provided in the configuration and converts the data types 
-        to match the SQL schema for insertion into the database.
-
         Parameters
         ----------
         players_df : DataFrame
@@ -150,11 +149,25 @@ class Clean:
         # Remap data types for SQL Player table. 
         players_df = self.convert_column_types(players_df, self.players_df_to_player_table_datatypes)
 
-        self.log.info("Successfully cleaned dataframe to load into database. ")
+        self.log.info("Successfully cleaned players_df to load into database. ")
         return players_df
 
 
     def clean_game(self, game_data_df):
+        """
+        Cleans the game DataFrame (general game info) by renaming columns and converting data types. Then wrangle some
+        additonal information (ID of winning team, what season game is from, identify if game is a primetime game.)
+
+        Parameters
+        ----------
+        game_data_df : DataFrame
+            The DataFrame containing game data to be cleaned.
+
+        Returns
+        -------
+        DataFrame
+            The cleaned DataFrame ready for database insertion.
+        """
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
 
         # Rename columns for SQL Game table
@@ -182,8 +195,40 @@ class Clean:
 
         # Record if a game is a 'primetime' game. Defining as starting at 8PM or later. 
         game_data_df['PRIMETIME'] = self.check_if_primetime(game_data_df['GAME_TIME'].iloc[0])
-        print(game_data_df.head())
-        print(game_data_df.dtypes)
+
+        self.log.info("Successfully cleaned game_data_df to load into database. ")
+        return game_data_df
+    
+
+    def clean_team_game(self, team_game_df):
+        """
+        Cleans the team game DataFrame (team stats from particular game) by renaming columns and converting data types. Then wrangle fantasy 
+        points allowed by defense on various platforms. 
+
+        Parameters
+        ----------
+        game_data_df : DataFrame
+            The DataFrame containing game data to be cleaned.
+
+        Returns
+        -------
+        DataFrame
+            The cleaned DataFrame ready for database insertion.
+        """
+        self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
+
+        # Rename columns for SQL Team Game Stats table
+        try:
+            team_game_df.rename(columns=self.team_game_df_to_team_game_table_map, inplace=True)
+            self.log.info("Renamed team_game_df columns successfully.")
+        except Exception as e:
+            self.log.critical(f"Error renaming team_game_df columns: {e}")
+
+        # Remap data types for SQL Player table. 
+        team_game_df = self.convert_column_types(team_game_df, self.team_game_df_to_team_game_table_datatypes)
+
+        print(team_game_df.head())
+        print(team_game_df.dtypes)
 
 
 
@@ -204,6 +249,7 @@ class Clean:
         - The function appends 'M' to the 'a' or 'p' to match the expected '%I:%M%p' format
         for datetime parsing.
         """
+        print(time)
         # Add 'M' to the end of 'a' or 'p' to form 'AM' or 'PM'
         if time.endswith('a') or time.endswith('p'):
             time = time[:-1] + ('AM' if time.endswith('a') else 'PM')

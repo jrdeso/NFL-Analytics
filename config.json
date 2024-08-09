@@ -48,13 +48,9 @@
         "teamStats.home.yardsPerPlay",
         "teamStats.home.yardsPerRush",
         "DST.home.defTD",
-        "DST.home.defensiveInterceptions",
         "DST.home.fumblesRecovered",
         "DST.home.ptsAllowed",
         "DST.home.sacks",
-        "DST.home.safeties",
-        "DST.home.teamAbv",
-        "DST.home.teamID",
         "DST.home.ydsAllowed"
     ],
 
@@ -93,11 +89,9 @@
         "teamStats.home.yardsPerPlay": "yardsPerPlay",
         "teamStats.home.yardsPerRush": "yardsPerRush",
         "DST.home.defTD": "defTD",
-        "DST.home.defensiveInterceptions": "defensiveInterceptions",
         "DST.home.fumblesRecovered": "fumblesRecovered",
         "DST.home.ptsAllowed": "ptsAllowed",
         "DST.home.sacks": "sacks",
-        "DST.home.safeties": "safeties",
         "DST.home.ydsAllowed": "yardsAllowed"
     },
 
@@ -136,11 +130,9 @@
         "teamStats.away.yardsPerPlay",
         "teamStats.away.yardsPerRush",
         "DST.away.defTD",
-        "DST.away.defensiveInterceptions",
         "DST.away.fumblesRecovered",
         "DST.away.ptsAllowed",
         "DST.away.sacks",
-        "DST.away.safeties",
         "DST.away.ydsAllowed"
     ],
 
@@ -179,11 +171,9 @@
         "teamStats.away.yardsPerPlay": "yardsPerPlay",
         "teamStats.away.yardsPerRush": "yardsPerRush",
         "DST.away.defTD": "defTD",
-        "DST.away.defensiveInterceptions": "defensiveInterceptions",
         "DST.away.fumblesRecovered": "fumblesRecovered",
         "DST.away.ptsAllowed": "ptsAllowed",
         "DST.away.sacks": "sacks",
-        "DST.away.safeties": "safeties",
         "DST.away.ydsAllowed": "yardsAllowed"
     },
 
@@ -293,12 +283,7 @@
         "away": "AWAY_TEAM",
         "teamIDAway": "AWAY_TEAM_ID",
         "awayPts": "AWAY_POINTS",
-        "awayResult": "AWAY_RESULT",
-
-        "a": "WINNING_TEAM_ID",
-        "b": "SEASON_ID",
-        
-        "d": "PRIMETIME"
+        "awayResult": "AWAY_RESULT"
     },
 
     "game_data_df_to_game_table_datatypes": {
@@ -313,12 +298,91 @@
         "AWAY_TEAM": "TEXT",
         "AWAY_TEAM_ID": "INTEGER",
         "AWAY_POINTS": "INTEGER",
-        "AWAY_RESULT": "TEXT",
-        
-        "WINNING_TEAM_ID": "INTEGER",
-        "SEASON_ID": "TEXT",
-        
-        "PRIMETIME": "TEXT"
+        "AWAY_RESULT": "TEXT"
+    },
+
+    "team_game_df_to_team_game_table_map": {
+        "gameID": "GAME_ID",
+        "gameDate": "GAME_DATE",
+        "gameType": "GAME_TYPE",
+        "team": "TEAM_ABBR",
+        "teamID": "TEAM_ID",
+        "versusTeam": "VERSUS_TEAM",
+        "versusTeamID": "VERSUS_TEAM_ID",
+        "homeOrAway": "HOME_OR_AWAY",
+        "defInterceptions": "DEF_INTERCEPTIONS",
+        "fumblesRecovered": "FUMBLES_RECOVERED",
+        "defensiveOrSpecialTeamsTds": "DEF_OR_ST_TOUCHDOWNS",
+        "defTD": "DEF_TOUCHDOWN",
+        "firstDowns": "OFF_FIRST_DOWNS",
+        "firstDownsFromPenalties": "OFF_FIRST_DOWNS_FROM_PEN",
+        "fourthDownEfficiency": "OFF_FOURTH_DOWN_EFFICIENCY",
+        "fumblesLost": "FUMBLES_LOST",
+        "interceptionsThrown": "INTERCEPTIONS_THROWN",
+        "passCompletionsAndAttempts": "OFF_PASS_COMPLETIONS_AND_ATTEMPTS",
+        "passingFirstDowns": "OFF_PASSING_FIRST_DOWNS",
+        "passingYards": "OFF_PASSING_YARDS",
+        "penalties": "PENALTIES",
+        "possession": "POSSESSION_TIME",
+        "redZoneScoredAndAttempted": "OFF_RED_ZONE_SCORED_AND_ATTEMPTED",
+        "rushingAttempts": "OFF_RUSHING_ATTEMPTS",
+        "rushingFirstDowns": "OFF_RUSHING_FIRST_DOWNS",
+        "rushingYards": "OFF_RUSHING_YARDS",
+        "sacksAndYardsLost": "SACKS_TAKEN_AND_YARDS_LOST",
+        "safeties": "SAFETIES",
+        "thirdDownEfficiency": "OFF_THIRD_DOWN_EFFICIENCY",
+        "totalDrives": "TOTAL_DRIVES",
+        "totalPlays": "TOTAL_PLAYS",
+        "totalYards": "TOTAL_YARDS",
+        "turnovers": "TURNOVERS",
+        "yardsPerPass": "YARDS_PER_PASS_PLAY",
+        "yardsPerPlay": "YARDS_PER_PLAY",
+        "yardsPerRush": "YARDS_PER_RUSH",
+        "ptsAllowed": "POINTS_ALLOWED",
+        "sacks": "DEF_SACKS",
+        "yardsAllowed": "DEF_YARDS_ALLOWED"
+    },
+
+    "team_game_df_to_team_game_table_datatypes": {
+        "GAME_ID": "TEXT",
+        "GAME_DATE": "TEXT",
+        "GAME_TYPE": "TEXT",
+        "TEAM_ABBR": "TEXT",
+        "TEAM_ID": "INTEGER",
+        "VERSUS_TEAM": "TEXT",
+        "VERSUS_TEAM_ID": "INTEGER",
+        "HOME_OR_AWAY": "TEXT",
+        "DEF_INTERCEPTIONS": "INTEGER",
+        "FUMBLES_RECOVERED": "INTEGER",
+        "DEF_OR_ST_TOUCHDOWNS": "INTEGER",
+        "DEF_TOUCHDOWN": "INTEGER",
+        "OFF_FIRST_DOWNS": "INTEGER",
+        "OFF_FIRST_DOWNS_FROM_PEN": "INTEGER",
+        "OFF_FOURTH_DOWN_EFFICIENCY": "TEXT",
+        "FUMBLES_LOST": "INTEGER",
+        "INTERCEPTIONS_THROWN": "INTEGER",
+        "OFF_PASS_COMPLETIONS_AND_ATTEMPTS": "TEXT",
+        "OFF_PASSING_FIRST_DOWNS": "INTEGER",
+        "OFF_PASSING_YARDS": "INTEGER",
+        "PENALTIES": "TEXT",
+        "POSSESSION_TIME": "TEXT",
+        "OFF_RED_ZONE_SCORED_AND_ATTEMPTED": "TEXT",
+        "OFF_RUSHING_ATTEMPTS": "INTEGER",
+        "OFF_RUSHING_FIRST_DOWNS": "INTEGER",
+        "OFF_RUSHING_YARDS": "INTEGER",
+        "SACKS_TAKEN_AND_YARDS_LOST": "TEXT",
+        "SAFETIES": "INTEGER",
+        "OFF_THIRD_DOWN_EFFICIENCY": "TEXT",
+        "TOTAL_DRIVES": "INTEGER",
+        "TOTAL_PLAYS": "INTEGER",
+        "TOTAL_YARDS": "INTEGER",
+        "TURNOVERS": "INTEGER",
+        "YARDS_PER_PASS_PLAY": "REAL",
+        "YARDS_PER_PLAY": "REAL",
+        "YARDS_PER_RUSH": "REAL",
+        "POINTS_ALLOWED": "INTEGER",
+        "DEF_SACKS": "INTEGER",
+        "DEF_YARDS_ALLOWED": "INTEGER"
     }
 
 }
