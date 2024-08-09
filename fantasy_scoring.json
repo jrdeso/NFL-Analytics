@@ -1,0 +1,55 @@
+{
+    "Friend_League": {
+        "Passing": {
+            "passing_yards": 0.04,
+            "touchdown": 4,
+            "two_pt_conversion": 2,
+            "interception": -2,
+            "fumble": -2,
+            "forty_yard_td_bonus": 1
+        },
+
+        "Rushing": {
+            "rushing_yards": 0.1,
+            "touchdown": 6,
+            "two_pt_conversion": 2,
+            "fumble": -2,
+            "forty_yard_td_bonus": 1
+        },
+
+        "Receiving": {
+            "reception": 1,
+            "rushing_yards": 0.1,
+            "touchdown": 6,
+            "two_pt_conversion": 2,
+            "fumble": -2,
+            "forty_yard_td_bonus": 1
+        }, 
+
+        "Defense": {
+            "touchdown": 6,
+            "points_allowed_0": 5,
+            "points_allowed_1_6": 4,
+            "points_allowed_7_13": 3,
+            "points_allowed_14_20": 1,
+            "points_allowed_21_27": 0,
+            "points_allowed_28_34": -1,
+            "points_allowed_35_plus": -4,
+            "yards_allowed_sub_100": 5,
+            "yards_allowed_100_199": 3,
+            "yards_allowed_200_299": 2,
+            "yards_allowed_300_349": 0,
+            "yards_allowed_350_399": -1,
+            "yards_allowed_400_449": -3,
+            "yards_allowed_450_499": -5,
+            "yards_allowed_500_549": -6,
+            "yards_allowed_550_plus": -7,
+            "sack": 1,
+            "fumble_recovery": 2,
+            "interception": 2,
+            "safety": 2,
+            "blocked_kick": 2,
+            "twp_pt_conversion_return": 2
+        }
+    }
+}
