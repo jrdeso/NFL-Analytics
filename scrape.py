@@ -201,7 +201,7 @@ class Scrape:
             game_id (str): The game ID for which to retrieve the start time.
 
         Returns:
-            str: The start time of the specified NFL game, formatted without the 'p' character.
+            str: The start time of the specified NFL game.
 
         Raises:
             requests.exceptions.RequestException: If the API request fails or there is an error in retrieving data.
@@ -224,7 +224,7 @@ class Scrape:
             response = requests.get(query, headers=self.headers, params=self.params)
             data = response.json().get('body', {})
             temp_df = pd.json_normalize(data)
-            game_time = temp_df[game_id+'.gameTime'].iloc[0].strip('p')
+            game_time = temp_df[game_id+'.gameTime'].iloc[0]
 
             # return scraped and filtered dataframe
             self.log.info(f"Successfully scraped [{game_id}] start time from: {query}")

@@ -1,5 +1,6 @@
 import pandas as pd
 import json
+from datetime import datetime
 from log_helper import NFL_Logging
 import os
 import inspect
@@ -156,7 +157,66 @@ class Clean:
     def clean_game(self, game_data_df):
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
 
+        # Rename columns for SQL Game table
+        try:
+            game_data_df.rename(columns=self.game_data_df_to_game_table_map, inplace=True)
+            self.log.info("Renamed game_data_df columns successfully.")
+        except Exception as e:
+            self.log.critical(f"Error renaming game_data_df columns: {e}")
 
+        # Remap data types for SQL Game table. 
+        game_data_df = self.convert_column_types(game_data_df, self.game_data_df_to_game_table_datatypes)
+
+        # Wrangle winning team ID > store ID of team who won and add to dataframe (if tie, enter None)
+        game_data_df['WINNING_TEAM_ID'] = game_data_df.apply(
+            lambda row: row['HOME_TEAM_ID'] if row['HOME_POINTS'] > row['AWAY_POINTS'] else (
+                row['AWAY_TEAM_ID'] if row['AWAY_POINTS'] > row['HOME_POINTS'] else None), 
+            axis=1
+        )
+
+        # Format GAME_DATE to desired format (YYYYMMDD -> MM-DD-YYYY)
+        game_data_df['GAME_DATE'] = self.format_date(game_data_df['GAME_DATE'].iloc[0])
+
+        # Assign SEASON_ID into dataframe (pull from date of game). Season ID's are the starting year of season (e.g., 23-24 > 2023)
+        game_data_df['SEASON_ID'] = game_data_df['GAME_DATE'].iloc[0][-4:] # pull last four digits of date (YYYY)
+
+        # Record if a game is a 'primetime' game. Defining as starting at 8PM or later. 
+        game_data_df['PRIMETIME'] = self.check_if_primetime(game_data_df['GAME_TIME'].iloc[0])
+        print(game_data_df.head())
+        print(game_data_df.dtypes)
+
+
+
+    def check_if_primetime(self, time):
+        """
+        Determines if a given time is 8:00 PM or later and can be considered 'primetime'.
+
+        Parameters:
+        time (str):     A string representing the time in the format 'H:MMa' or 'H:MMp',
+                        where 'a' denotes AM and 'p' denotes PM.
+
+        Returns:
+        str: 'Yes' if the time is 8:00 PM or later, 'No' otherwise.
+
+        Notes:
+        - The input time string is expected to be in 12-hour format with a single 'a' or 'p' 
+        to denote AM or PM respectively.
+        - The function appends 'M' to the 'a' or 'p' to match the expected '%I:%M%p' format
+        for datetime parsing.
+        """
+        # Add 'M' to the end of 'a' or 'p' to form 'AM' or 'PM'
+        if time.endswith('a') or time.endswith('p'):
+            time = time[:-1] + ('AM' if time.endswith('a') else 'PM')
+        # get time object
+        time_obj = datetime.strptime(time, '%I:%M%p')
+        # Defining threshold of time of a primetime game as 8PM or later. 
+        primetime_threshold = datetime.strptime('8:00PM', '%I:%M%p')
+
+        # Check if time is considered 'primetime'
+        if time_obj >= primetime_threshold:
+            return 'Yes'
+        else:
+            return 'No'
 
 
     def convert_column_types(self, df, column_types):
@@ -192,7 +252,7 @@ class Clean:
         return df
 
 
-    def format_date(date_str):
+    def format_date(self, date_str):
         """
         Converts a date string from 'YYYYMMDD' format to 'MM-DD-YYYY' format.
 

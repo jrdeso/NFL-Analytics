@@ -53,27 +53,31 @@ def run_pipeline(year=None):
     # # Combining all players games for a whole season gets messy real quick.
     # # E.g., ended up with a final dataframe with 47,000+ columns. 
     # ## >> Process each game individually, game data, team data, player data. 
-    # for game in games_list:
-    #     # Scrape individual game info
-    #     game_info_df = scraper.scrape_game_info(game)
+    for game in games_list:
+        # Scrape individual game info
+        game_info_df = scraper.scrape_game_info(game)
 
-    #     if game_info_df is not None:
-    #         # Organize each game into their separate dataframes
-    #         game_data_df, home_team_data_df, away_team_data_df, players_stats_df = cleaner.organize_game_info_df(game_info_df)
+        if game_info_df is not None:
+            # Organize each game into their separate dataframes
+            game_data_df, home_team_data_df, away_team_data_df, players_stats_df = cleaner.organize_game_info_df(game_info_df)
             
-    #         # Scrape game time into game_data_df (originally not included)
-    #         game_data_df['gameTime'] = scraper.scrape_game_time(game_data_df['gameID'])
+            # Scrape game time into game_data_df (originally not included)
+            game_data_df['gameTime'] = scraper.scrape_game_time(game_data_df['gameID'])
+            # Clean game data for SQL load
+            game_data_df = cleaner.clean_game(game_data_df)
+
+    
             
-    #         save_df(game_data_df, 'game_data_df')
-    #         save_df(home_team_data_df, 'home_team_data_df')
-    #         save_df(away_team_data_df, 'away_team_data_df')
-    #         save_df(players_stats_df, 'players_stats_df')
-    #     break
+            save_df(game_data_df, 'game_data_df')
+            save_df(home_team_data_df, 'home_team_data_df')
+            save_df(away_team_data_df, 'away_team_data_df')
+            save_df(players_stats_df, 'players_stats_df')
+        break
 
     game_data_df = load_df('game_data_df')
     game_data_df['gameTime'] = scraper.scrape_game_time(game_data_df['gameID'].iloc[0])
-    print(game_data_df.head())
-    print(game_data_df.dtypes)
+    game_data_df = cleaner.clean_game(game_data_df)
+    
 
 
 

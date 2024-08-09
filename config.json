@@ -284,6 +284,7 @@
     "game_data_df_to_game_table_map": {
         "gameID": "GAME_ID",
         "gameDate": "GAME_DATE",
+        "gameTime": "GAME_TIME",
         "seasonType": "GAME_TYPE",
         "home": "HOME_TEAM",
         "teamIDHome": "HOME_TEAM_ID",
@@ -296,14 +297,14 @@
 
         "a": "WINNING_TEAM_ID",
         "b": "SEASON_ID",
-        "c": "GAME_TIME",
-        "d": "PRIMETIME",
-        "e": "WEATHER"
+        
+        "d": "PRIMETIME"
     },
 
     "game_data_df_to_game_table_datatypes": {
         "GAME_ID": "TEXT",
         "GAME_DATE": "TEXT",
+        "GAME_TIME": "TEXT",
         "GAME_TYPE": "TEXT",
         "HOME_TEAM": "TEXT",
         "HOME_TEAM_ID": "INTEGER",
@@ -316,9 +317,8 @@
         
         "WINNING_TEAM_ID": "INTEGER",
         "SEASON_ID": "TEXT",
-        "GAME_TIME": "TEXT",
-        "PRIMETIME": "TEXT",
-        "WEATHER": "TEXT"
+        
+        "PRIMETIME": "TEXT"
     }
 
 }
