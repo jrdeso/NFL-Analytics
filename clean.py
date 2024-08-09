@@ -23,24 +23,24 @@ class Clean:
         with open('config.json') as f:
             config = json.load(f)
 
-        self.game_filtered_fields = config['game_filtered_fields']              # To filter desired game fields from API
-        self.home_team_filtered_fields = config['home_team_filtered_fields']    # To filter desired game fields from API
-        self.home_team_renamed_fields = config['home_team_renamed_fields']      # To rename fields filtered from API
-        self.away_team_filtered_fields = config['away_team_filtered_fields']    # To filter desired game fields from API
-        self.away_team_renamed_fields = config['away_team_renamed_fields']      # To rename fields filtered from API
-        self.player_data_cols = config['player_data_cols']                      # To identify fields related to player and their stats from a game
-        self.player_stat_columns = config['player_stat_columns']                # To identify fields related particularly to player stats
+        self.game_filtered_fields = config['Game_Table_Mapping']['dataframe_field_filters']                      # To filter desired game fields from API
+        self.home_team_filtered_fields = config['Team_Game_Stats_Mapping']['hometeam_dataframe_field_filters']   # To filter desired game fields from API
+        self.home_team_renamed_fields = config['Team_Game_Stats_Mapping']['hometeam_renamed_fields']             # To rename fields filtered from API
+        self.away_team_filtered_fields = config['Team_Game_Stats_Mapping']['awayteam_dataframe_field_filters']   # To filter desired game fields from API
+        self.away_team_renamed_fields = config['Team_Game_Stats_Mapping']['awayteam_renamed_fields']             # To rename fields filtered from API
+        self.player_data_cols = config['Player_Table_Mapping']['dataframe_field_filters']                        # To identify fields related to player and their stats from a game
+        self.player_stat_columns = config['Player_Table_Mapping']['filter_for_player_stats']                     # To identify fields related particularly to player stats
         
         # Maps from extracted/cleaned table dataframe to corresponding columns in SQL Table
-        self.players_df_to_player_table_map = config['players_df_to_player_table_map']
-        self.game_data_df_to_game_table_map = config['game_data_df_to_game_table_map']   
-        self.team_game_df_to_team_game_table_map = config['team_game_df_to_team_game_table_map']   
+        self.players_df_to_player_table_map = config['Player_Table_Mapping']['fieldnames_to_table_map']
+        self.game_data_df_to_game_table_map = config['Game_Table_Mapping']['fieldnames_to_table_map']   
+        self.team_game_df_to_team_game_table_map = config['Team_Game_Stats_Mapping']['fieldnames_to_table_map']   
 
 
         # Maps dataframe types to correct SQL datatypes for each table
-        self.players_df_to_player_table_datatypes = config['players_df_to_player_table_datatypes']
-        self.game_data_df_to_game_table_datatypes = config['game_data_df_to_game_table_datatypes']
-        self.team_game_df_to_team_game_table_datatypes = config['team_game_df_to_team_game_table_datatypes']   
+        self.players_df_to_player_table_datatypes = config['Player_Table_Mapping']['df_datatypes_to_db_datatypes']
+        self.game_data_df_to_game_table_datatypes = config['Game_Table_Mapping']['df_datatypes_to_db_datatypes']
+        self.team_game_df_to_team_game_table_datatypes = config['Team_Game_Stats_Mapping']['df_datatypes_to_db_datatypes']   
 
 
     def organize_game_info_df(self, game_info_df):
