@@ -37,7 +37,6 @@ class Clean:
         self.team_game_df_to_team_game_table_map = config['Team_Game_Stats_Mapping']['fieldnames_to_table_map']   
         self.player_game_df_to_player_game_table_map = config['Player_Game_Stats_Mapping']['fieldnames_to_table_map']  
 
-
         # Maps dataframe types to correct SQL datatypes for each table
         self.players_df_to_player_table_datatypes = config['Player_Table_Mapping']['df_datatypes_to_db_datatypes']
         self.game_data_df_to_game_table_datatypes = config['Game_Table_Mapping']['df_datatypes_to_db_datatypes']
@@ -206,8 +205,7 @@ class Clean:
 
     def clean_team_game_stats(self, team_game_df):
         """
-        Cleans the team game DataFrame (team stats from particular game) by renaming columns and converting data types. Then wrangle fantasy 
-        points allowed by defense on various platforms. 
+        Cleans the team game DataFrame (team stats from particular game) by renaming columns and converting data types. 
 
         Parameters
         ----------
@@ -234,7 +232,22 @@ class Clean:
         self.log.info("Successfully cleaned team_game_df to load into database. ")
         return team_game_df
     
+
     def clean_player_game_stats(self, player_game_stats_df):
+        """
+        Cleans the player game DataFrame (player stats from particular game) by renaming columns and converting data types. Then wrangle fantasy 
+        points for players across three different platforms (Home league, DK DFS, and FD DFS)
+
+        Parameters
+        ----------
+        player_game_stats_df : DataFrame
+            The DataFrame containing player game stats data to be cleaned.
+
+        Returns
+        -------
+        DataFrame
+            The cleaned DataFrame ready for database insertion.
+        """
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
 
         # Rename columns for SQL Team Game Stats table
@@ -247,19 +260,75 @@ class Clean:
         # Remap data types for SQL Player table. 
         player_game_stats_df = self.convert_column_types(player_game_stats_df, self.player_game_df_to_player_game_table_datatypes)
 
-        print(player_game_stats_df.head())
-        print(player_game_stats_df.dtypes)
+        # Add fields for fantasy points scored across different platforms (Home league, DK DFS, FD DFS)
+        for platform in ['HOME_LEAGUE', 'DK-DFS', 'FD-DFS']:
+            player_game_stats_df[f'Fantasy_Points_{platform}'] = player_game_stats_df.apply(
+                lambda row: self.calculate_fantasy_points(row, platform), axis=1,
+            )
+
+        self.log.info("Successfully cleaned player_game_stats_df to load into database. ")
+        return player_game_stats_df
 
 
-    def wrangle_player_fantasy_scores(player_game_stats_df):
+    def calculate_fantasy_points(self, row, platform):
         """
-        Take player stats df from a game and calculate out their fantasy scores in home league, DK-DFS, and FD-DFS.
+        Calculate the fantasy points for a given player based on their game statistics and the specified scoring platform. Use the reference
+        fantasy_scoring.json file for various scoring across platforms (home league, DK DFS, and FD, DFS)
+
+        Args:
+            row (pandas.Series): A row from the DataFrame containing player game statistics. Expected fields include:
+                - 'PASSING_YARDS'
+                - 'RUSHING_RUSH_YARDS'
+                - 'RECEIVING_REC_YARDS'
+                - Other relevant statistical fields.
+            platform (str): The scoring platform to use for calculating fantasy points. Must be one of:
+                - 'HOME_LEAGUE'
+                - 'DK-DFS'
+                - 'FD-DFS'
+
+        Returns:
+            float: The total fantasy points calculated for the player based on the provided scoring platform and statistics.
         """
-        with open('fantasy_scoring.json') as f:
+        # Load the fantasy scoring rules from the JSON file
+        with open('fantasy_scoring.json', 'r') as f:
             scoring_guide = json.load(f)
+        
+        # Get the scoring guide for the specific platform
+        platform_scoring_guide = scoring_guide.get(platform, {})
 
-        # Calculate Home League Points
+        # Calculate general fantasy points
+        points = 0
+        for category, stats in platform_scoring_guide.items():
+            for stat, multiplier in stats.items():
+                if stat in row:
+                    points += row[stat] * multiplier
 
+        # Calculate yard bonuses for Home League and DK, FD has no yard bonuses. 
+        if platform == 'HOME_LEAGUE':
+            if 300 <= row['PASSING_YARDS'] < 400:
+                points += platform_scoring_guide['PASSING'].get('YARD_BONUS_300_399_YDS', 0)
+            elif row['PASSING_YARDS'] >= 400:
+                points += platform_scoring_guide['PASSING'].get('YARD_BONUS_400_PLUS_YDS', 0)
+
+            if 100 <= row['RUSHING_RUSH_YARDS'] < 200:
+                points += platform_scoring_guide['RUSHING'].get('YARD_BONUS_100_199_YDS', 0)
+            elif row['RUSHING_RUSH_YARDS'] >= 200:
+                points += platform_scoring_guide['RUSHING'].get('YARD_BONUS_200_PLUS_YDS', 0)
+
+            if 100 <= row['RECEIVING_REC_YARDS'] < 200:
+                points += platform_scoring_guide['RECEIVING'].get('YARD_BONUS_100_199_YDS', 0)
+            elif row['RECEIVING_REC_YARDS'] >= 200:
+                points += platform_scoring_guide['RECEIVING'].get('YARD_BONUS_200_PLUS_YDS', 0)
+        
+        elif platform == 'DK-DFS':
+            if row['PASSING_YARDS'] >= 300:
+                points += platform_scoring_guide['PASSING'].get('YARD_BONUS_300_PLUS_YDS', 0)
+            if row['RUSHING_RUSH_YARDS'] >= 100:
+                points += platform_scoring_guide['RUSHING'].get('YARD_BONUS_100_PLUS_YDS', 0)
+            if row['RECEIVING_REC_YARDS'] >= 100:
+                points += platform_scoring_guide['RECEIVING'].get('YARD_BONUS_100_PLUS_YDS', 0)
+
+        return points
 
 
     def check_if_primetime(self, time):
