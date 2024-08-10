@@ -1,55 +1,148 @@
 {
-    "Friend_League": {
-        "Passing": {
-            "passing_yards": 0.04,
-            "touchdown": 4,
-            "two_pt_conversion": 2,
-            "interception": -2,
-            "fumble": -2,
-            "forty_yard_td_bonus": 1
+    "HOME_LEAGUE": {
+        "PASSING": {
+            "PASSING_YARDS": 0.04,
+            "PASSING_TOUCHDOWNS": 4,
+            "PASSING_PASS_TWO_PT_CNVR": 2,
+            "PASSING_INTERCEPTIONS": -2,
+            "YARD_BONUS_300_399_YDS": 1,
+            "YARD_BONUS_400_PLUS_YDS": 2
         },
 
-        "Rushing": {
-            "rushing_yards": 0.1,
-            "touchdown": 6,
-            "two_pt_conversion": 2,
-            "fumble": -2,
-            "forty_yard_td_bonus": 1
+        "RUSHING": {
+            "RUSHING_RUSH_YARDS": 0.1,
+            "RUSHING_RUSH_TOUCHDOWNS": 6,
+            "RUSHING_RUSH_TWO_PT_CNVR": 2,
+            "YARD_BONUS_100_199_YDS": 1,
+            "YARD_BONUS_200_PLUS_YDS": 2
         },
 
-        "Receiving": {
-            "reception": 1,
-            "rushing_yards": 0.1,
-            "touchdown": 6,
-            "two_pt_conversion": 2,
-            "fumble": -2,
-            "forty_yard_td_bonus": 1
+        "RECEIVING": {
+            "RECEIVING_RECEPTIONS": 1,
+            "RECEIVING_REC_YARDS": 0.1,
+            "RECEIVING_REC_TOUCHDOWNS": 6,
+            "RECEIVING_REC_TWO_PT_CNVR": 2,
+            "YARD_BONUS_100_199_YDS": 1,
+            "YARD_BONUS_200_PLUS_YDS": 2
         }, 
 
-        "Defense": {
-            "touchdown": 6,
-            "points_allowed_0": 5,
-            "points_allowed_1_6": 4,
-            "points_allowed_7_13": 3,
-            "points_allowed_14_20": 1,
-            "points_allowed_21_27": 0,
-            "points_allowed_28_34": -1,
-            "points_allowed_35_plus": -4,
-            "yards_allowed_sub_100": 5,
-            "yards_allowed_100_199": 3,
-            "yards_allowed_200_299": 2,
-            "yards_allowed_300_349": 0,
-            "yards_allowed_350_399": -1,
-            "yards_allowed_400_449": -3,
-            "yards_allowed_450_499": -5,
-            "yards_allowed_500_549": -6,
-            "yards_allowed_550_plus": -7,
-            "sack": 1,
-            "fumble_recovery": 2,
-            "interception": 2,
-            "safety": 2,
-            "blocked_kick": 2,
-            "twp_pt_conversion_return": 2
+        "MISC": {
+            "FUMBLES_LOST": -2
+        },
+
+        "DEFENSE": {
+            "TOUCHDOWN": 6,
+            "POINTS_ALLOWED_0": 5,
+            "POINTS_ALLOWED_1_6": 4,
+            "POINTS_ALLOWED_7_13": 3,
+            "POINTS_ALLOWED_14_20": 1,
+            "POINTS_ALLOWED_21_27": 0,
+            "POINTS_ALLOWED_28_34": -1,
+            "POINTS_ALLOWED_35_PLUS": -4,
+            "YARDS_ALLOWED_SUB_100": 5,
+            "YARDS_ALLOWED_100_199": 3,
+            "YARDS_ALLOWED_200_299": 2,
+            "YARDS_ALLOWED_300_349": 0,
+            "YARDS_ALLOWED_350_399": -1,
+            "YARDS_ALLOWED_400_449": -3,
+            "YARDS_ALLOWED_450_499": -5,
+            "YARDS_ALLOWED_500_549": -6,
+            "YARDS_ALLOWED_550_PLUS": -7,
+            "SACK": 1,
+            "FUMBLE_RECOVERY": 2,
+            "INTERCEPTION": 2,
+            "SAFETY": 2,
+            "BLOCKED_KICK": 2,
+            "TWP_PT_CONVERSION_RETURN": 2
+        }
+    },
+
+    "DK-DFS": {
+        "PASSING": {
+            "PASSING_YARDS": 0.04,
+            "PASSING_TOUCHDOWNS": 4,
+            "PASSING_PASS_TWO_PT_CNVR": 2,
+            "PASSING_INTERCEPTIONS": -1,
+            "YARD_BONUS_300_PLUS_YDS": 3
+        },
+
+        "RUSHING": {
+            "RUSHING_RUSH_YARDS": 0.1,
+            "RUSHING_RUSH_TOUCHDOWNS": 6,
+            "RUSHING_RUSH_TWO_PT_CNVR": 2,
+            "YARD_BONUS_100_PLUS_YDS": 3
+        },
+
+        "RECEIVING": {
+            "RECEIVING_RECEPTIONS": 1,
+            "RECEIVING_REC_YARDS": 0.1,
+            "RECEIVING_REC_TOUCHDOWNS": 6,
+            "RECEIVING_REC_TWO_PT_CNVR": 2,
+            "YARD_BONUS_100_PLUS_YDS": 3
+        }, 
+
+        "MISC": {
+            "FUMBLES_LOST": -2
+        },
+
+        "DEFENSE": {
+            "TOUCHDOWN": 6,
+            "POINTS_ALLOWED_0": 10,
+            "POINTS_ALLOWED_1_6": 7,
+            "POINTS_ALLOWED_7_13": 4,
+            "POINTS_ALLOWED_14_20": 1,
+            "POINTS_ALLOWED_21_27": 0,
+            "POINTS_ALLOWED_28_34": -1,
+            "POINTS_ALLOWED_35_PLUS": -4,
+            "SACK": 1,
+            "FUMBLE_RECOVERY": 2,
+            "INTERCEPTION": 2,
+            "SAFETY": 2,
+            "BLOCKED_KICK": 2,
+            "TWP_PT_CONVERSION_RETURN": 2
+        }
+    },
+
+    "FD-DFS": {
+        "PASSING": {
+            "PASSING_YARDS": 0.04,
+            "PASSING_TOUCHDOWNS": 4,
+            "PASSING_PASS_TWO_PT_CNVR": 2,
+            "PASSING_INTERCEPTIONS": -1
+        },
+
+        "RUSHING": {
+            "RUSHING_RUSH_YARDS": 0.1,
+            "RUSHING_RUSH_TOUCHDOWNS": 6,
+            "RUSHING_RUSH_TWO_PT_CNVR": 2
+        },
+
+        "RECEIVING": {
+            "RECEIVING_RECEPTIONS": 0.5,
+            "RECEIVING_REC_YARDS": 0.1,
+            "RECEIVING_REC_TOUCHDOWNS": 6,
+            "RECEIVING_REC_TWO_PT_CNVR": 2
+        }, 
+
+        "MISC": {
+            "FUMBLES_LOST": -2
+        },
+
+        "DEFENSE": {
+            "TOUCHDOWN": 6,
+            "POINTS_ALLOWED_0": 10,
+            "POINTS_ALLOWED_1_6": 7,
+            "POINTS_ALLOWED_7_13": 4,
+            "POINTS_ALLOWED_14_20": 1,
+            "POINTS_ALLOWED_21_27": 0,
+            "POINTS_ALLOWED_28_34": -1,
+            "POINTS_ALLOWED_35_PLUS": -4,
+            "SACK": 1,
+            "FUMBLE_RECOVERY": 2,
+            "INTERCEPTION": 2,
+            "SAFETY": 2,
+            "BLOCKED_KICK": 2,
+            "TWP_PT_CONVERSION_RETURN": 2
         }
     }
 }

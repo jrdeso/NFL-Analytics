@@ -28,19 +28,21 @@ class Clean:
         self.home_team_renamed_fields = config['Team_Game_Stats_Mapping']['hometeam_renamed_fields']             # To rename fields filtered from API
         self.away_team_filtered_fields = config['Team_Game_Stats_Mapping']['awayteam_dataframe_field_filters']   # To filter desired game fields from API
         self.away_team_renamed_fields = config['Team_Game_Stats_Mapping']['awayteam_renamed_fields']             # To rename fields filtered from API
-        self.player_data_cols = config['Player_Table_Mapping']['dataframe_field_filters']                        # To identify fields related to player and their stats from a game
-        self.player_stat_columns = config['Player_Table_Mapping']['filter_for_player_stats']                     # To identify fields related particularly to player stats
+        self.player_data_cols = config['Player_Game_Stats_Mapping']['dataframe_field_filters']                   # To identify fields related to player and their stats from a game
+        self.player_stat_columns = config['Player_Game_Stats_Mapping']['filter_for_player_stats']                # To identify fields related particularly to player stats
         
         # Maps from extracted/cleaned table dataframe to corresponding columns in SQL Table
         self.players_df_to_player_table_map = config['Player_Table_Mapping']['fieldnames_to_table_map']
         self.game_data_df_to_game_table_map = config['Game_Table_Mapping']['fieldnames_to_table_map']   
         self.team_game_df_to_team_game_table_map = config['Team_Game_Stats_Mapping']['fieldnames_to_table_map']   
+        self.player_game_df_to_player_game_table_map = config['Player_Game_Stats_Mapping']['fieldnames_to_table_map']  
 
 
         # Maps dataframe types to correct SQL datatypes for each table
         self.players_df_to_player_table_datatypes = config['Player_Table_Mapping']['df_datatypes_to_db_datatypes']
         self.game_data_df_to_game_table_datatypes = config['Game_Table_Mapping']['df_datatypes_to_db_datatypes']
         self.team_game_df_to_team_game_table_datatypes = config['Team_Game_Stats_Mapping']['df_datatypes_to_db_datatypes']   
+        self.player_game_df_to_player_game_table_datatypes = config['Player_Game_Stats_Mapping']['df_datatypes_to_db_datatypes']  
 
 
     def organize_game_info_df(self, game_info_df):
@@ -119,6 +121,8 @@ class Clean:
         mask = players_stats_df[self.player_stat_columns].isna().all(axis=1) | (players_stats_df[self.player_stat_columns] == '').all(axis=1)
         # Drop the rows where the mask is True
         players_stats_df = players_stats_df[~mask]
+        # Drop 'teamAbv' and 'Passing.rtg' fields from dataframe
+        players_stats_df = players_stats_df.drop(columns=['teamAbv', 'Passing.rtg'])
 
         return game_data_df, home_team_data_df, away_team_data_df, players_stats_df
     
@@ -200,7 +204,7 @@ class Clean:
         return game_data_df
     
 
-    def clean_team_game(self, team_game_df):
+    def clean_team_game_stats(self, team_game_df):
         """
         Cleans the team game DataFrame (team stats from particular game) by renaming columns and converting data types. Then wrangle fantasy 
         points allowed by defense on various platforms. 
@@ -227,8 +231,34 @@ class Clean:
         # Remap data types for SQL Player table. 
         team_game_df = self.convert_column_types(team_game_df, self.team_game_df_to_team_game_table_datatypes)
 
-        print(team_game_df.head())
-        print(team_game_df.dtypes)
+        self.log.info("Successfully cleaned team_game_df to load into database. ")
+        return team_game_df
+    
+    def clean_player_game_stats(self, player_game_stats_df):
+        self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
+
+        # Rename columns for SQL Team Game Stats table
+        try:
+            player_game_stats_df.rename(columns=self.player_game_df_to_player_game_table_map, inplace=True)
+            self.log.info("Renamed player_game_stats_df columns successfully.")
+        except Exception as e:
+            self.log.critical(f"Error player_game_stats_df player_game_stats_df columns: {e}")
+
+        # Remap data types for SQL Player table. 
+        player_game_stats_df = self.convert_column_types(player_game_stats_df, self.player_game_df_to_player_game_table_datatypes)
+
+        print(player_game_stats_df.head())
+        print(player_game_stats_df.dtypes)
+
+
+    def wrangle_player_fantasy_scores(player_game_stats_df):
+        """
+        Take player stats df from a game and calculate out their fantasy scores in home league, DK-DFS, and FD-DFS.
+        """
+        with open('fantasy_scoring.json') as f:
+            scoring_guide = json.load(f)
+
+        # Calculate Home League Points
 
 
 
@@ -249,7 +279,6 @@ class Clean:
         - The function appends 'M' to the 'a' or 'p' to match the expected '%I:%M%p' format
         for datetime parsing.
         """
-        print(time)
         # Add 'M' to the end of 'a' or 'p' to form 'AM' or 'PM'
         if time.endswith('a') or time.endswith('p'):
             time = time[:-1] + ('AM' if time.endswith('a') else 'PM')
