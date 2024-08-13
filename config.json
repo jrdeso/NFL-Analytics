@@ -457,5 +457,44 @@
             "RUSHING_RUSH_TWO_PT_CNVR": "INTEGER",
             "FUMBLES_LOST": "INTEGER"
         }
+    },
+
+    "Weather_Table_Mapping": {
+        "Team_Abbreviations": {
+            "Cardinals": "ARI",
+            "Falcons": "ATL",
+            "Ravens": "BAL",
+            "Bills": "BUF",
+            "Panthers": "CAR",
+            "Bears": "CHI",
+            "Bengals": "CIN",
+            "Browns": "CLE",
+            "Cowboys": "DAL",
+            "Broncos": "DEN",
+            "Lions": "DET",
+            "Packers": "GB",
+            "Texans": "HOU",
+            "Colts": "IND",
+            "Jaguars": "JAX",
+            "Chiefs": "KC",
+            "Raiders": "LV",
+            "Chargers": "LAC",
+            "Rams": "LAR",
+            "Dolphins": "MIA",
+            "Vikings": "MIN",
+            "Patriots": "NE",
+            "Saints": "NO",
+            "Giants": "NYG",
+            "Jets": "NYJ",
+            "Eagles": "PHI",
+            "Steelers": "PIT",
+            "49ers": "SF",
+            "Seahawks": "SEA",
+            "Buccaneers": "TB",
+            "Titans": "TEN",
+            "Washington": "WAS"
+        }
+
     }
+
 }
