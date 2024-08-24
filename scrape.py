@@ -1,12 +1,20 @@
 import requests
 import pandas as pd
-from bs4 import BeautifulSoup
 import os
 import inspect
 from datetime import datetime
 import json
 from dotenv import load_dotenv
 from log_helper import NFL_Logging
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from io import StringIO
+import pandas as pd
+import json
+from datetime import datetime
 
 
 class Scrape:
@@ -18,9 +26,14 @@ class Scrape:
         load_dotenv() ## Load .env file
         self.log = NFL_Logging()
         self.api_base_url = "https://tank01-nfl-live-in-game-real-time-statistics-nfl.p.rapidapi.com/"
-        self.headers = {'x-rapidapi-key': os.getenv('API_KEY')}
+        self.headers = {'x-rapidapi-key': os.getenv('RAPID_API_KEY')}
         self.endpoint = ""
         self.params = ""
+
+        # open json dict defining weather scrape details
+        with open('config.json') as f:
+            config = json.load(f)
+        self.team_data_map = config['Weather_Table_Mapping']
 
 
     def scrape_players(self):
@@ -229,6 +242,17 @@ class Scrape:
             temp_df = pd.json_normalize(data)
             game_time = temp_df[game_id+'.gameTime'].iloc[0]
 
+            # Extract the time and period (AM/PM) (it originally returns time with an 'a' or 'p')
+            time_str = game_time[:-1].strip()
+            period = game_time[-1].lower()
+            # Convert period to AM/PM
+            if period == 'a':
+                period_str = 'AM'
+            elif period == 'p':
+                period_str = 'PM'
+
+            # Format the time string
+            game_time = f"{time_str} {period_str}"
             # return scraped and filtered dataframe
             self.log.info(f"Successfully scraped [{game_id}] start time from: {query}")
             return game_time
@@ -237,124 +261,47 @@ class Scrape:
             self.log.critical(f"Failed to retrieve data at {query}: {str(e)}")
 
 
-    def scrape_weather_data(self, year=None, week=None):
+    def scrape_weather_data(self, home_team, game_date, game_id):
+        """
+        Scrapes weather data from https://www.wunderground.com/ and returns it as a pandas dataframe
+        Define the URL from parameters and query using selenium/chrome webdriver. 
+
+        Then scrape HTML returned for the 'daily observation' table holding hourly weather information. 
+
+        Returns:
+            pandas.DataFrame: A DataFrame containing information about weather at specific location
+        Raises:
+            requests.exceptions.RequestException: If there is an error in retrieving data.
+
+        Examples:
+            >>> scraper = Scrape()
+            >>> df = scraper.scrape_weather_data('LV', '08-04-2022', '20220804_JAX@LV')
+            >>> print(df.head(1))
+                        GAME_ID      Time Temperature Dew Point Humidity  Wind Wind Speed Wind Gust   Pressure  Precip.                Condition
+            0   20220804_JAX@LV  12:53 AM       94 °F     55 °F    27 °%     N     5 °mph    0 °mph  27.54 °in  0.0 °in                     Fair
+        """
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
-        years_list = [2022, 2023, 2024]
-        weeks_dict = {
-            "Preseason 1": "preseason-week-1",
-            "Preseason 2": "preseason-week-2",
-            "Preseason 3": "preseason-week-3",
-            "1": "week-1",
-            "2": "week-2",
-            "3": "week-3",
-            "4": "week-4",
-            "5": "week-5",
-            "6": "week-6",
-            "7": "week-7",
-            "8": "week-8",
-            "9": "week-9",
-            "10": "week-10",
-            "11": "week-11",
-            "12": "week-12",
-            "13": "week-13",
-            "14": "week-14",
-            "15": "week-15",
-            "16": "week-16",
-            "17": "week-17",
-            "18": "week-18",
-            "Wild Card": "wild-card",
-            "Divisional Round": "divisional-round",
-            "Conference Championship": "conference-championship",
-            "Super Bowl": "super-bowl"
-        }
-        # Check if acceptable parameter given
-        if year is not None and year not in years_list:
-            self.log.critical("Invalid year given for weather scrape. ")
-            return
-        if week is not None and week not in weeks_dict:
-            self.log.critical("Invalid week given for weather scrape. ")
-            return 
-        
-        # filter years_list and weeks_dict to the specific year/week given, if none leave as the entire set of years/weeks 
-        if year in years_list:
-            years_list = [year]
-        if week in weeks_dict:
-            weeks_dict = {week: weeks_dict[week]}
-
-        # Initialize an empty list to store the data
-        weather_data = []
-
-        # open config.json to get defined dictionary on team names to their abbreviations (need it to format gameID)
-        with open('config.json') as f:
-            config = json.load(f)
-        team_abbr = config['Weather_Table_Mapping']['Team_Abbreviations']     
-        
-        base_weather_url = "https://www.nflweather.com/week/"
-
         try:
-            for year in years_list:
-                for week in weeks_dict:
-                    # query weather data for season and week given
-                    response = requests.get(base_weather_url + year + '/' + weeks_dict[week]) 
+            # Define parameters for URL query
+            state_abbr = self.team_data_map[home_team]['state']
+            city = self.team_data_map[home_team]['city']
+            formatted_date = datetime.strptime(game_date, '%m-%d-%Y').strftime('%Y-%m-%d')
+            url = f"https://www.wunderground.com/history/daily/us/{state_abbr}/{city}/date/{formatted_date}"
 
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    # Find all game boxes (that hold weather data for the given response)
-                    game_boxes = soup.find_all('div', class_='game-box')
+            # Define chrome driver and run request (run headless)
+            chrome_options = Options()
+            chrome_options.add_argument("--headless")
+            chrome_options.add_argument("--disable-gpu")  # Optional: to avoid GPU rendering issues
+            driver = webdriver.Chrome(options=chrome_options)
+            driver.get(url)
 
-                    # Loop through each game box and extract data
-                    for game_box in game_boxes:
-                        # Extract game date and time
-                        date_time = game_box.find('div', class_='game-kickoff-status').get_text(strip=True).strip('Final')
-                        
-                        # Extract team names 
-                        teams = game_box.find_all('div', class_='team-game-box')
-                        away_team_name = teams[0].find('span', class_='fw-bold').get_text(strip=True)
-                        home_team_name = teams[1].find('span', class_='fw-bold').get_text(strip=True)
-
-                        # Extract weather condition
-                        weather_div = game_box.find('div', class_='text-break')
-                        weather_condition = weather_div.find('span').get_text(strip=True) if weather_div else 'No data'
-
-                        # Extract wind speed and direction
-                        wind_div = game_box.find('div', class_='text-break col-md-2 mb-1 px-1 flex-centered')
-                        wind_speed_span = wind_div.find_all('span')
-                        wind_speed = "No wind speed data"
-                        wind_direction = "No wind direction data"
-                        for span in wind_speed_span:
-                            text = span.get_text(strip=True)
-                            if 'mph' in text:
-                                wind_data = text.split('mph')
-                                wind_speed = wind_data[0].strip()
-                                if '_' in wind_data[1]: # has dir such as NE, NW, SE, SW
-                                    wind_direction = wind_data[1][-2:]
-                                elif '' == wind_data[1]: # empty > no wind direction data
-                                    wind_direction = "No wind direction data"
-                                else: # directions are signular e.g., N, E, S, W
-                                    wind_direction = wind_data[1][-1]
-                                
-                        # Check for dome game
-                        dome_img = game_box.find('img', class_='game-box-weather-image')
-                        dome_game = dome_img['src'] == '/climates/dome.webp' if dome_img else False
-
-                        # Extract a gameID field (this is used as foreign key for other tables)
-                        game_id_date = datetime.strptime(date_time[0:8], '%m/%d/%y')
-                        game_id_date = game_id_date.strftime("%Y%m%d")
-                        game_id = game_id_date + '_' + team_abbr[away_team_name] + '@' + team_abbr[home_team_name]
-
-                        # Append the data to the list
-                        weather_data.append({
-                            "GAME_ID": game_id,
-                            "AWAY_TEAM": away_team_name,
-                            "HOME_TEAM": home_team_name,
-                            "WEATHER": weather_condition,
-                            "WIND_SPEED_MPH": wind_speed,
-                            "WIND_DIRECTION": wind_direction,
-                            "DOME_GAME": dome_game
-                        })
-            weather_df = pd.DataFrame(weather_data)
-            self.log.info(f"Successfully scraped weather data.")
-            return weather_df
+            # Scrape for tables, and get second table (daily observations table)
+            web_page_tables = WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table")))
+            daily_obs_html = web_page_tables[1].get_attribute('outerHTML')
+            daily_obs_df = pd.read_html(StringIO(daily_obs_html))[0]
+            daily_obs_df.insert(0, 'GAME_ID', game_id)
+            self.log.info(f"Successfully scraped weather data for [{game_id}] from: {url}")
+            return daily_obs_df
         
         except requests.exceptions.RequestException as e:
-            self.log.critical(f"Error scraping weather data: {str(e)}")
-
+            self.log.critical(f"Failed to retrieve data at {url}: {str(e)}")

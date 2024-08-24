@@ -43,6 +43,10 @@ def run_pipeline(year=None):
     games_list = nfl_schedule_2022['gameID'].tolist()
 
     # # Put all season's game IDs in a list
+    # time = scraper.scrape_game_time("20231008_JAX@BUF")
+    # time = '8:00 PM'
+    # print(time)
+    # print(cleaner.check_if_primetime(time))
 
 
     # """ Scrape game info for 2022 Games """
@@ -68,21 +72,22 @@ def run_pipeline(year=None):
     #         home_team_data_df = cleaner.clean_team_game_stats(home_team_data_df)
     #         away_team_data_df = cleaner.clean_team_game_stats(away_team_data_df)
 
+    #         # Clean player game stats
+    #         players_stats_df = cleaner.clean_player_game_stats(players_stats_df)
 
-    
-            
     #         save_df(game_data_df, 'game_data_df')
     #         save_df(home_team_data_df, 'home_team_data_df')
     #         save_df(away_team_data_df, 'away_team_data_df')
     #         save_df(players_stats_df, 'players_stats_df')
     #     break
 
-    players_stats_df = load_df('players_stats_df')
-    cleaner.clean_player_game_stats(players_stats_df)
+
+    # weather_df = scraper.scrape_weather_data('LV', '08-04-2022', '20220804_JAX@LV')
+    weather_df = load_df('weather_df')
+    weather_df = cleaner.clean_weather_df(weather_df, '8:00 PM')
+    print(weather_df)
 
 
-
-    
 
 
 

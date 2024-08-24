@@ -459,42 +459,285 @@
         }
     },
 
+    
     "Weather_Table_Mapping": {
-        "Team_Abbreviations": {
-            "Cardinals": "ARI",
-            "Falcons": "ATL",
-            "Ravens": "BAL",
-            "Bills": "BUF",
-            "Panthers": "CAR",
-            "Bears": "CHI",
-            "Bengals": "CIN",
-            "Browns": "CLE",
-            "Cowboys": "DAL",
-            "Broncos": "DEN",
-            "Lions": "DET",
-            "Packers": "GB",
-            "Texans": "HOU",
-            "Colts": "IND",
-            "Jaguars": "JAX",
-            "Chiefs": "KC",
-            "Raiders": "LV",
-            "Chargers": "LAC",
-            "Rams": "LAR",
-            "Dolphins": "MIA",
-            "Vikings": "MIN",
-            "Patriots": "NE",
-            "Saints": "NO",
-            "Giants": "NYG",
-            "Jets": "NYJ",
-            "Eagles": "PHI",
-            "Steelers": "PIT",
-            "49ers": "SF",
-            "Seahawks": "SEA",
-            "Buccaneers": "TB",
-            "Titans": "TEN",
-            "Washington": "WAS"
+        "ARI": {
+            "teamname": "Cardinals",
+            "city": "glendale",
+            "state": "az",
+            "zipcode": "85305",
+            "latitude": 33.5275,
+            "longitude": -112.2626
+        },
+        "ATL": {
+            "teamname": "Falcons",
+            "city": "atlanta",
+            "state": "ga",
+            "zipcode": "30313",
+            "latitude": 33.7554,
+            "longitude": -84.4008
+        },
+        "BAL": {
+            "teamname": "Ravens",
+            "city": "baltimore",
+            "state": "md",
+            "zipcode": "21230",
+            "latitude": 39.2779,
+            "longitude": -76.6227
+        },
+        "BUF": {
+            "teamname": "Bills",
+            "city": "buffalo",
+            "state": "ny",
+            "zipcode": "14225",
+            "latitude": 42.7738,
+            "longitude": -78.7868
+        },
+        "CAR": {
+            "teamname": "Panthers",
+            "city": "charlotte",
+            "state": "nc",
+            "zipcode": "28202",
+            "latitude": 35.2258,
+            "longitude": -80.8528
+        },
+        "CHI": {
+            "teamname": "Bears",
+            "city": "chicago",
+            "state": "il",
+            "zipcode": "60605",
+            "latitude": 41.8623,
+            "longitude": -87.6167
+        },
+        "CIN": {
+            "teamname": "Bengals",
+            "city": "cincinnati",
+            "state": "oh",
+            "zipcode": "45202",
+            "latitude": 39.0955,
+            "longitude": -84.5161
+        },
+        "CLE": {
+            "teamname": "Browns",
+            "city": "cleveland",
+            "state": "oh",
+            "zipcode": "44114",
+            "latitude": 41.5061,
+            "longitude": -81.6995
+        },
+        "DAL": {
+            "teamname": "Cowboys",
+            "city": "arlington",
+            "state": "tx",
+            "zipcode": "76011",
+            "latitude": 32.7473,
+            "longitude": -97.0945
+        },
+        "DEN": {
+            "teamname": "Broncos",
+            "city": "denver",
+            "state": "co",
+            "zipcode": "80204",
+            "latitude": 39.7439,
+            "longitude": -105.0201
+        },
+        "DET": {
+            "teamname": "Lions",
+            "city": "detroit",
+            "state": "mi",
+            "zipcode": "48226",
+            "latitude": 42.3400,
+            "longitude": -83.0456
+        },
+        "GB": {
+            "teamname": "Packers",
+            "city": "green-bay",
+            "state": "wi",
+            "zipcode": "54304",
+            "latitude": 44.5013,
+            "longitude": -88.0622
+        },
+        "HOU": {
+            "teamname": "Texans",
+            "city": "houston",
+            "state": "tx",
+            "zipcode": "77054",
+            "latitude": 29.6847,
+            "longitude": -95.4107
+        },
+        "IND": {
+            "teamname": "Colts",
+            "city": "indianapolis",
+            "state": "in",
+            "zipcode": "46225",
+            "latitude": 39.7601,
+            "longitude": -86.1639
+        },
+        "JAX": {
+            "teamname": "Jaguars",
+            "city": "jacksonville",
+            "state": "fl",
+            "zipcode": "32202",
+            "latitude": 30.3239,
+            "longitude": -81.6373
+        },
+        "KC": {
+            "teamname": "Chiefs",
+            "city": "kansas-city",
+            "state": "mo",
+            "zipcode": "64129",
+            "latitude": 39.0490,
+            "longitude": -94.4844
+        },
+        "LV": {
+            "teamname": "Raiders",
+            "city": "las-vegas",
+            "state": "nv",
+            "zipcode": "89118",
+            "latitude": 36.0909,
+            "longitude": -115.1830
+        },
+        "LAC": {
+            "teamname": "Chargers",
+            "city": "los-angeles",
+            "state": "ca",
+            "zipcode": "90245",
+            "latitude": 33.9535,
+            "longitude": -118.3392
+        },
+        "LAR": {
+            "teamname": "Rams",
+            "city": "los-angeles",
+            "state": "ca",
+            "zipcode": "90245",
+            "latitude": 33.9535,
+            "longitude": -118.3392
+        },
+        "MIA": {
+            "teamname": "Dolphins",
+            "city": "miami",
+            "state": "fl",
+            "zipcode": "33056",
+            "latitude": 25.9580,
+            "longitude": -80.2389
+        },
+        "MIN": {
+            "teamname": "Vikings",
+            "city": "minneapolis",
+            "state": "mn",
+            "zipcode": "55403",
+            "latitude": 44.9735,
+            "longitude": -93.2573
+        },
+        "NE": {
+            "teamname": "Patriots",
+            "city": "foxborough",
+            "state": "ma",
+            "zipcode": "02054",
+            "latitude": 42.0909,
+            "longitude": -71.2643
+        },
+        "NO": {
+            "teamname": "Saints",
+            "city": "new-orleans",
+            "state": "la",
+            "zipcode": "70112",
+            "latitude": 29.9511,
+            "longitude": -90.0812
+        },
+        "NYG": {
+            "teamname": "Giants",
+            "city": "east-rutherford",
+            "state": "nj",
+            "zipcode": "07073",
+            "latitude": 40.8135,
+            "longitude": -74.0745
+        },
+        "NYJ": {
+            "teamname": "Jets",
+            "city": "east-rutherford",
+            "state": "nj",
+            "zipcode": "07073",
+            "latitude": 40.8135,
+            "longitude": -74.0745
+        },
+        "PHI": {
+            "teamname": "Eagles",
+            "city": "philadelphia",
+            "state": "pa",
+            "zipcode": "19148",
+            "latitude": 39.9008,
+            "longitude": -75.1675
+        },
+        "PIT": {
+            "teamname": "Steelers",
+            "city": "pittsburgh",
+            "state": "pa",
+            "zipcode": "15212",
+            "latitude": 40.4467,
+            "longitude": -80.0158
+        },
+        "SF": {
+            "teamname": "49ers",
+            "city": "santa-clara",
+            "state": "ca",
+            "zipcode": "95054",
+            "latitude": 37.4033,
+            "longitude": -121.9694
+        },
+        "SEA": {
+            "teamname": "Seahawks",
+            "city": "seattle",
+            "state": "wa",
+            "zipcode": "98109",
+            "latitude": 47.5952,
+            "longitude": -122.3316
+        },
+        "TB": {
+            "teamname": "Buccaneers",
+            "city": "tampa",
+            "state": "fl",
+            "zipcode": "33607",
+            "latitude": 27.9759,
+            "longitude": -82.5033
+        },
+        "TEN": {
+            "teamname": "Titans",
+            "city": "nashville",
+            "state": "tn",
+            "zipcode": "37219",
+            "latitude": 36.1664,
+            "longitude": -86.7713
+        },
+        "WAS": {
+            "teamname": "Commanders",
+            "city": "landover",
+            "state": "md",
+            "zipcode": "20785",
+            "latitude": 38.9078,
+            "longitude": -76.8644
+        },
+
+        "fieldnames_to_table_map": {
+            "GAME_ID": "GAME_ID",
+            "Time": "TIME",
+            "Temperature": "TEMPERATURE",
+            "Humidity": "HUMIDITY",
+            "Wind": "WIND_DIRECTION",
+            "Wind Speed": "WIND_SPEED",
+            "Precip.": "PRECIPITATION",
+            "Condition": "CONDITION"
+        },
+    
+        "df_datatypes_to_db_datatypes": {
+            "GAME_ID": "TEXT",
+            "TIME": "TEXT",
+            "TEMPERATURE": "INTEGER",
+            "HUMIDITY": "INTEGER",
+            "TEXT": "TEXT",
+            "WIND_SPEED": "INTEGER",
+            "PRECIPITATION": "REAL",
+            "CONDITION": "TEXT"
         }
-
     }
-
 }

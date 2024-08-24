@@ -1,6 +1,6 @@
 import pandas as pd
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from log_helper import NFL_Logging
 import os
 import inspect
@@ -36,12 +36,14 @@ class Clean:
         self.game_data_df_to_game_table_map = config['Game_Table_Mapping']['fieldnames_to_table_map']   
         self.team_game_df_to_team_game_table_map = config['Team_Game_Stats_Mapping']['fieldnames_to_table_map']   
         self.player_game_df_to_player_game_table_map = config['Player_Game_Stats_Mapping']['fieldnames_to_table_map']  
+        self.weather_df_to_weather_table_map = config['Weather_Table_Mapping']['fieldnames_to_table_map']  
 
         # Maps dataframe types to correct SQL datatypes for each table
         self.players_df_to_player_table_datatypes = config['Player_Table_Mapping']['df_datatypes_to_db_datatypes']
         self.game_data_df_to_game_table_datatypes = config['Game_Table_Mapping']['df_datatypes_to_db_datatypes']
         self.team_game_df_to_team_game_table_datatypes = config['Team_Game_Stats_Mapping']['df_datatypes_to_db_datatypes']   
-        self.player_game_df_to_player_game_table_datatypes = config['Player_Game_Stats_Mapping']['df_datatypes_to_db_datatypes']  
+        self.player_game_df_to_player_game_table_datatypes = config['Player_Game_Stats_Mapping']['df_datatypes_to_db_datatypes']
+        self.weather_df_to_weather_table_datatypes = config['Weather_Table_Mapping']['df_datatypes_to_db_datatypes'] 
 
 
     def organize_game_info_df(self, game_info_df):
@@ -255,7 +257,7 @@ class Clean:
             player_game_stats_df.rename(columns=self.player_game_df_to_player_game_table_map, inplace=True)
             self.log.info("Renamed player_game_stats_df columns successfully.")
         except Exception as e:
-            self.log.critical(f"Error player_game_stats_df player_game_stats_df columns: {e}")
+            self.log.critical(f"Error renaming player_game_stats_df columns: {e}")
 
         # Remap data types for SQL Player table. 
         player_game_stats_df = self.convert_column_types(player_game_stats_df, self.player_game_df_to_player_game_table_datatypes)
@@ -269,6 +271,72 @@ class Clean:
         self.log.info("Successfully cleaned player_game_stats_df to load into database. ")
         return player_game_stats_df
 
+
+    def clean_weather_df(self, weather_df, game_time):
+        """
+        Cleans a weather data DataFrame (weather data related to a particular game) by dropping empty rows, filtering for weather during
+        game time, dropping unwanted columns, and then cleaning units out of rows. 
+
+        Parameters
+        ----------
+        player_game_stats_df : DataFrame
+            The DataFrame containing a weather dataframe to be cleaned
+
+        Returns
+        -------
+        DataFrame
+            The cleaned DataFrame ready for database insertion.
+        """
+        self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
+        # Drop rows where all elements are NaN
+        weather_df = weather_df.dropna(how='all').copy()
+
+        # Convert game_time to a datetime object (used to search for weather data when game was going on)
+        game_time_dt = datetime.strptime(game_time, '%I:%M %p')
+        weather_df['Time_dt'] = pd.to_datetime(weather_df['Time'], format='%I:%M %p', errors='coerce')
+
+        # Define the game window (1 hour before start, 4 hours after start)
+        start_time = game_time_dt - timedelta(hours=1)
+        end_time = game_time_dt + timedelta(hours=4)
+
+        # Filter the DataFrame based on the datetime objects
+        filtered_df = weather_df[(weather_df['Time_dt'] >= start_time) & (weather_df['Time_dt'] <= end_time)].copy()
+
+        # Drop the temporary 'Time_dt' column (only used in calculations)
+        filtered_df.drop(columns=['Time_dt'], inplace=True)
+
+        # Drop unwanted weather columns
+        columns_to_drop = ['Dew Point', 'Wind Gust', 'Pressure']
+        existing_columns_to_drop = [col for col in columns_to_drop if col in filtered_df.columns]
+        filtered_df.drop(columns=existing_columns_to_drop, inplace=True)
+
+        # Rename columns (To identify units)
+        clean_col = [
+            'Temperature',
+            'Humidity',
+            'Wind Speed',
+            'Precip.'
+        ]
+        # Clean units out of each row in the dataframe
+        for col in clean_col:
+            if col in filtered_df.columns:
+                filtered_df[col] = filtered_df[col].str.replace('\xa0°F', '', regex=False)
+                filtered_df[col] = filtered_df[col].str.replace('\xa0°%', '', regex=False)
+                filtered_df[col] = filtered_df[col].str.replace('\xa0°mph', '', regex=False)
+                filtered_df[col] = filtered_df[col].str.replace('\xa0°in', '', regex=False)
+        
+        # Rename columns for SQL Game_Weather table
+        try:
+            filtered_df.rename(columns=self.weather_df_to_weather_table_map, inplace=True)
+            self.log.info("Renamed weather_df columns successfully.")
+        except Exception as e:
+            self.log.critical(f"Error renaming weather_df columns: {e}")
+
+        # Remap data types for SQL Game_Weather table
+        filtered_df = self.convert_column_types(filtered_df, self.weather_df_to_weather_table_datatypes)
+        
+        self.log.info("Successfully cleaned a weather_df to load into database. ")
+        return filtered_df
 
     def calculate_fantasy_points(self, row, platform):
         """
@@ -336,8 +404,7 @@ class Clean:
         Determines if a given time is 8:00 PM or later and can be considered 'primetime'.
 
         Parameters:
-        time (str):     A string representing the time in the format 'H:MMa' or 'H:MMp',
-                        where 'a' denotes AM and 'p' denotes PM.
+        time (str):     A string representing the time in the format 'H:MM AM' or 'H:MM PM'.
 
         Returns:
         str: 'Yes' if the time is 8:00 PM or later, 'No' otherwise.
@@ -348,11 +415,8 @@ class Clean:
         - The function appends 'M' to the 'a' or 'p' to match the expected '%I:%M%p' format
         for datetime parsing.
         """
-        # Add 'M' to the end of 'a' or 'p' to form 'AM' or 'PM'
-        if time.endswith('a') or time.endswith('p'):
-            time = time[:-1] + ('AM' if time.endswith('a') else 'PM')
         # get time object
-        time_obj = datetime.strptime(time, '%I:%M%p')
+        time_obj = datetime.strptime(time, '%I:%M %p')
         # Defining threshold of time of a primetime game as 8PM or later. 
         primetime_threshold = datetime.strptime('8:00PM', '%I:%M%p')
 
