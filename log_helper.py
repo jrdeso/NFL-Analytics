@@ -20,3 +20,7 @@ class NFL_Logging:
     def critical(self, message):
         logging.critical(f"{message}")
 
+    def reset_log_file(self):
+        with open(self.logname, 'w') as log_file:
+            pass
+

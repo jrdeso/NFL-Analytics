@@ -263,8 +263,8 @@ class Clean:
         player_game_stats_df = self.convert_column_types(player_game_stats_df, self.player_game_df_to_player_game_table_datatypes)
 
         # Add fields for fantasy points scored across different platforms (Home league, DK DFS, FD DFS)
-        for platform in ['HOME_LEAGUE', 'DK-DFS', 'FD-DFS']:
-            player_game_stats_df[f'Fantasy_Points_{platform}'] = player_game_stats_df.apply(
+        for platform in ['HOME_LEAGUE_PTS', 'DK_PTS', 'FD_PTS']:
+            player_game_stats_df[f'{platform}'] = player_game_stats_df.apply(
                 lambda row: self.calculate_fantasy_points(row, platform), axis=1,
             )
 
@@ -288,8 +288,11 @@ class Clean:
             The cleaned DataFrame ready for database insertion.
         """
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
-        # Drop rows where all elements are NaN
-        weather_df = weather_df.dropna(how='all').copy()
+        if weather_df is not None:
+            # Drop rows where all elements are NaN
+            weather_df = weather_df.dropna(how='all').copy()
+        else:
+            return None
 
         # Convert game_time to a datetime object (used to search for weather data when game was going on)
         game_time_dt = datetime.strptime(game_time, '%I:%M %p')
@@ -338,6 +341,7 @@ class Clean:
         self.log.info("Successfully cleaned a weather_df to load into database. ")
         return filtered_df
 
+
     def calculate_fantasy_points(self, row, platform):
         """
         Calculate the fantasy points for a given player based on their game statistics and the specified scoring platform. Use the reference
@@ -350,9 +354,9 @@ class Clean:
                 - 'RECEIVING_REC_YARDS'
                 - Other relevant statistical fields.
             platform (str): The scoring platform to use for calculating fantasy points. Must be one of:
-                - 'HOME_LEAGUE'
-                - 'DK-DFS'
-                - 'FD-DFS'
+                - 'HOME_LEAGUE_PTS'
+                - 'DK-PTS'
+                - 'FD-PTS'
 
         Returns:
             float: The total fantasy points calculated for the player based on the provided scoring platform and statistics.
@@ -372,7 +376,7 @@ class Clean:
                     points += row[stat] * multiplier
 
         # Calculate yard bonuses for Home League and DK, FD has no yard bonuses. 
-        if platform == 'HOME_LEAGUE':
+        if platform == 'HOME_LEAGUE_PTS':
             if 300 <= row['PASSING_YARDS'] < 400:
                 points += platform_scoring_guide['PASSING'].get('YARD_BONUS_300_399_YDS', 0)
             elif row['PASSING_YARDS'] >= 400:
@@ -388,7 +392,7 @@ class Clean:
             elif row['RECEIVING_REC_YARDS'] >= 200:
                 points += platform_scoring_guide['RECEIVING'].get('YARD_BONUS_200_PLUS_YDS', 0)
         
-        elif platform == 'DK-DFS':
+        elif platform == 'DK_PTS':
             if row['PASSING_YARDS'] >= 300:
                 points += platform_scoring_guide['PASSING'].get('YARD_BONUS_300_PLUS_YDS', 0)
             if row['RUSHING_RUSH_YARDS'] >= 100:
@@ -396,7 +400,7 @@ class Clean:
             if row['RECEIVING_REC_YARDS'] >= 100:
                 points += platform_scoring_guide['RECEIVING'].get('YARD_BONUS_100_PLUS_YDS', 0)
 
-        return points
+        return round(points, 2)
 
 
     def check_if_primetime(self, time):

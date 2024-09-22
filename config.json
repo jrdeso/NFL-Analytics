@@ -427,7 +427,7 @@
 
         "df_datatypes_to_db_datatypes": {
             "PLAYER_ID": "INTEGER",
-            "GAME_ID": "GAME_ID",
+            "GAME_ID": "TEXT",
             "PLAYER_NAME": "TEXT",
             "TEAM": "TEXT",
             "TEAM_ID": "INTEGER",
@@ -717,6 +717,15 @@
             "latitude": 38.9078,
             "longitude": -76.8644
         },
+        
+        "WSH": {
+            "teamname": "Commanders",
+            "city": "landover",
+            "state": "md",
+            "zipcode": "20785",
+            "latitude": 38.9078,
+            "longitude": -76.8644
+        },
 
         "fieldnames_to_table_map": {
             "GAME_ID": "GAME_ID",
@@ -734,7 +743,7 @@
             "TIME": "TEXT",
             "TEMPERATURE": "INTEGER",
             "HUMIDITY": "INTEGER",
-            "TEXT": "TEXT",
+            "WIND_DIRECTION": "TEXT",
             "WIND_SPEED": "INTEGER",
             "PRECIPITATION": "REAL",
             "CONDITION": "TEXT"

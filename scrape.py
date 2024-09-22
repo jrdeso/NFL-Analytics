@@ -303,5 +303,5 @@ class Scrape:
             self.log.info(f"Successfully scraped weather data for [{game_id}] from: {url}")
             return daily_obs_df
         
-        except requests.exceptions.RequestException as e:
+        except (requests.exceptions.RequestException, IndexError, AttributeError) as e:
             self.log.critical(f"Failed to retrieve data at {url}: {str(e)}")

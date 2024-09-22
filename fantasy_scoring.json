@@ -1,5 +1,5 @@
 {
-    "HOME_LEAGUE": {
+    "HOME_LEAGUE_PTS": {
         "PASSING": {
             "PASSING_YARDS": 0.04,
             "PASSING_TOUCHDOWNS": 4,
@@ -57,7 +57,7 @@
         }
     },
 
-    "DK-DFS": {
+    "DK_PTS": {
         "PASSING": {
             "PASSING_YARDS": 0.04,
             "PASSING_TOUCHDOWNS": 4,
@@ -103,7 +103,7 @@
         }
     },
 
-    "FD-DFS": {
+    "FD_PTS": {
         "PASSING": {
             "PASSING_YARDS": 0.04,
             "PASSING_TOUCHDOWNS": 4,
