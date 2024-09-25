@@ -2,7 +2,6 @@ import requests
 import pandas as pd
 import os
 import inspect
-from datetime import datetime
 import json
 from dotenv import load_dotenv
 from log_helper import NFL_Logging
@@ -14,7 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from io import StringIO
 import pandas as pd
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 
 
 class Scrape:
@@ -34,6 +34,33 @@ class Scrape:
         with open('config.json') as f:
             config = json.load(f)
         self.team_data_map = config['Weather_Table_Mapping']
+
+        # Counter to assist in recording API inquirys (to help keep track of limit while pipeline running. )
+        self.api_request_count = 0
+
+
+    def check_api_count(self):
+        """
+        This function helps prevent overages on API subscription.
+        Current plan is 1000 calls/day.
+        If we hit 1000 while the pipeline is running, wait until 12:15 AM the next day to continue the process.
+        """
+        if self.api_request_count < 1000:
+            pass
+        else:
+            # We've hit max API calls for the day > wait to continue script until 12:15 next day
+            # get current time
+            now = datetime.now()
+            # calculate time to wait
+            tomorrow = now + timedelta(days=1)
+            next_run_time = datetime(year=tomorrow.year, month=tomorrow.month, day=tomorrow.day, hour=0, minute=15) # Resume 12:15AM tomorrow
+            # Calculate the seconds to wait
+            wait_seconds = (next_run_time - now).total_seconds()
+            self.log.warning(f"API limit reached. Waiting {wait_seconds // 3600} hours and {(wait_seconds % 3600) // 60} minutes until 12:15 AM tomorrow.")
+
+            # wait and reset count back to 0 for next day
+            time.sleep(wait_seconds)
+            self.api_request_count = 0
 
 
     def scrape_players(self):
@@ -67,6 +94,9 @@ class Scrape:
             query = self.api_base_url + self.endpoint
             # get response and convert to pd dataframe
             response = requests.get(query, headers=self.headers, params=self.params)
+            self.api_request_count += 1 # Increase API Count
+            self.check_api_count()  # Check if we've hit max queries for today
+
             data = response.json().get('body', {})
             players_df = pd.json_normalize(data)
 
@@ -136,6 +166,9 @@ class Scrape:
             }
             # get response and convert to pd dataframe
             response = requests.get(query, headers=self.headers, params=self.params)
+            self.api_request_count += 1 # Increase API Count
+            self.check_api_count()  # Check if we've hit max queries for today
+
             data = response.json().get('body', {})
             season_games_df = pd.json_normalize(data)
 
@@ -195,6 +228,9 @@ class Scrape:
             }
             # get response and convert to pd dataframe
             response = requests.get(query, headers=self.headers, params=self.params)
+            self.api_request_count += 1 # Increase API Count
+            self.check_api_count()  # Check if we've hit max queries for today
+
             data = response.json().get('body', {})
             game_info_df = pd.json_normalize(data)
 
@@ -238,6 +274,9 @@ class Scrape:
             }
             # get response and convert to pd dataframe
             response = requests.get(query, headers=self.headers, params=self.params)
+            self.api_request_count += 1 # Increase API Count
+            self.check_api_count()  # Check if we've hit max queries for today
+            
             data = response.json().get('body', {})
             temp_df = pd.json_normalize(data)
             game_time = temp_df[game_id+'.gameTime'].iloc[0]
@@ -245,6 +284,10 @@ class Scrape:
             # Extract the time and period (AM/PM) (it originally returns time with an 'a' or 'p')
             time_str = game_time[:-1].strip()
             period = game_time[-1].lower()
+
+            if time_str.startswith("0:"):
+                time_str = "12:" + time_str[2:]  # Convert "0:xx" to "12:xx"
+
             # Convert period to AM/PM
             if period == 'a':
                 period_str = 'AM'
