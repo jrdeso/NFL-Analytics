@@ -64,12 +64,17 @@ class Clean:
 
         # Extract general game info 
         game_data_df = game_info_df[self.game_filtered_fields].copy()
+        
+        # for col in game_info_df.columns:
+        #     print(col)
         # Extract home team data from game > Update names to clean up dataframe
-        home_team_data_df = game_info_df[self.home_team_filtered_fields].copy()
+        available_columns_home = [col for col in self.home_team_filtered_fields if col in game_info_df.columns]
+        home_team_data_df = game_info_df[available_columns_home].copy()
         home_team_data_df.rename(columns=self.home_team_renamed_fields, inplace=True)
         home_team_data_df['homeOrAway'] = 'Home'
         # Extract away team data from game > Update names to clean up dataframe
-        away_team_data_df = game_info_df[self.away_team_filtered_fields].copy()
+        available_columns_away = [col for col in self.away_team_filtered_fields if col in game_info_df.columns]
+        away_team_data_df = game_info_df[available_columns_away].copy()
         away_team_data_df.rename(columns=self.away_team_renamed_fields, inplace=True)
         away_team_data_df['homeOrAway'] = 'Away'
 
@@ -122,8 +127,20 @@ class Clean:
         mask = players_stats_df[self.player_stat_columns].isna().all(axis=1) | (players_stats_df[self.player_stat_columns] == '').all(axis=1)
         # Drop the rows where the mask is True
         players_stats_df = players_stats_df[~mask]
+
         # Drop 'teamAbv' and 'Passing.rtg' fields from dataframe
-        players_stats_df = players_stats_df.drop(columns=['teamAbv', 'Passing.rtg'])
+        try:
+            players_stats_df = players_stats_df.drop(columns=['teamAbv'])
+            players_stats_df = players_stats_df.drop(columns=['Passing.rtg'])
+        except KeyError:
+            self.log.warning("Couldn't drop teamAbv + Passing.rtg from player_stats_df")
+            pass
+
+        # There is a bug with the API for the January 2, 2024 BUF @ CIN game that was cancelled during the game
+        # This section accounts for it
+        if players_stats_df["gameID"].iloc[0] == '20230102_BUF@CIN':
+            players_stats_df['Rushing.rushYds'] = players_stats_df['Rushing.rushYds'].fillna(players_stats_df['Rushing.russYds'])
+            players_stats_df = players_stats_df.drop(columns=['Rushing.russYds'])
 
         return game_data_df, home_team_data_df, away_team_data_df, players_stats_df
     
