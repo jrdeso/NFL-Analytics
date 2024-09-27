@@ -334,7 +334,11 @@ class Scrape:
             # Define chrome driver and run request (run headless)
             chrome_options = Options()
             chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--disable-gpu")  # Optional: to avoid GPU rendering issues
+            chrome_options.add_argument("--disable-gpu")  # Disable GPU for headless mode
+            chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
+            chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
+            chrome_options.add_argument("window-size=1920x1080")  # Set window size to avoid issues
+        
             driver = webdriver.Chrome(options=chrome_options)
             driver.get(url)
 

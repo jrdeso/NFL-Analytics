@@ -40,6 +40,7 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     # save_df(schedule, 'schedule')
     # schedule = load_local_df('schedule')
     games_list = schedule['gameID'].tolist()
+
     # with open('2022-games.txt', 'r') as file:
     #     games_list = file.read().splitlines()
 
@@ -52,8 +53,8 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     conn.commit()
     log.info("Reset Game, Player_Game_Stats, Team_Game_Stats, and Weather table in database")
 
-    with open('games_list_subset.txt', 'r') as file:
-        games_list = file.read().splitlines()
+    # with open('games_list_subset.txt', 'r') as file:
+    #     games_list = file.read().splitlines()
 
     """ 
     Scrape game info for the year's games 
@@ -142,7 +143,7 @@ def run_pipeline(year=None):
 
 
 def main():
-    nfl_seasons = [2022]
+    nfl_seasons = [2024]
 
     for year in nfl_seasons:
         run_pipeline(year)

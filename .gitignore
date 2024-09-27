@@ -4,3 +4,6 @@
 /logs
 .env
 /Test-DataFrames
+2022-games.txt
+2023-games.txt
+games_list_subset.txt
