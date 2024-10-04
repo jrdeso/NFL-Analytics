@@ -37,6 +37,7 @@ def etl_players(conn, cursor, scraper, cleaner, log):
 def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     """ Scrape schedule for the given year"""
     schedule = scraper.scrape_nfl_schedule(year)
+
     # save_df(schedule, 'schedule')
     # schedule = load_local_df('schedule')
     games_list = schedule['gameID'].tolist()
@@ -69,6 +70,8 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
         if game_info_df is not None:
             # Organize each game into their separate dataframes
             game_data_df, home_team_data_df, away_team_data_df, players_stats_df = cleaner.organize_game_info_df(game_info_df)
+            # Add game week into game_data_df, we do this by merging it with data from the season df
+            game_data_df = game_data_df.merge(schedule[['gameID', 'gameWeek']], on='gameID', how='left')
             
             # Scrape game time into game_data_df (originally not included), and clean game_data_df
             game_data_df['gameTime'] = scraper.scrape_game_time(game_data_df['gameID'].iloc[0])
@@ -112,6 +115,7 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
                 weather_df.to_sql('Weather', conn, if_exists='append', index=False)
             conn.commit()
             log.info(f"Completed ETL process for {game_data_df["GAME_ID"].iloc[0]}")
+        break
             
 
 

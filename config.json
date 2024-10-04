@@ -16,6 +16,7 @@
 
         "fieldnames_to_table_map": {
             "gameID": "GAME_ID",
+            "gameWeek": "GAME_WEEK",
             "gameDate": "GAME_DATE",
             "gameTime": "GAME_TIME",
             "seasonType": "GAME_TYPE",
@@ -31,6 +32,7 @@
     
         "df_datatypes_to_db_datatypes": {
             "GAME_ID": "TEXT",
+            "GAME_WEEK": "TEXT",
             "GAME_DATE": "TEXT",
             "GAME_TIME": "TEXT",
             "GAME_TYPE": "TEXT",

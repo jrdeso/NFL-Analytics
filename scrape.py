@@ -183,6 +183,7 @@ class Scrape:
                 'away',         # Abbr of away team
                 'gameDate',     # Date of game (formatted as 20220804)
                 'gameTime',     # Time of game (EST)
+                'gameWeek'      # Week of game (e.g., 'Week 2', 'Preseason Week 1', 'Hall of Fame Weekend', 'Super Bowl', etc.)
             ]
             season_games_df = season_games_df[filtered_fields]
 
