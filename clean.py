@@ -211,9 +211,13 @@ class Clean:
 
         # Format GAME_DATE to desired format (YYYYMMDD -> MM-DD-YYYY)
         game_data_df['GAME_DATE'] = self.format_date(game_data_df['GAME_DATE'].iloc[0])
+        # Ensure date is datetime 
+        game_data_df['GAME_DATE'] = pd.to_datetime(game_data_df['GAME_DATE'])
 
         # Assign SEASON_ID into dataframe (pull from date of game). Season ID's are the starting year of season (e.g., 23-24 > 2023)
-        game_data_df['SEASON_ID'] = game_data_df['GAME_DATE'].iloc[0][-4:] # pull last four digits of date (YYYY)
+        game_data_df['SEASON_ID'] = game_data_df['GAME_DATE'].apply(
+            lambda date: date.year - 1 if date < pd.to_datetime(f'03-01-{date.year}') else date.year
+        )
 
         # Record if a game is a 'primetime' game. Defining as starting at 8PM or later. 
         game_data_df['PRIMETIME'] = self.check_if_primetime(game_data_df['GAME_TIME'].iloc[0])

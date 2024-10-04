@@ -31,4 +31,4 @@ INSERT INTO Team (TEAM_ID, CITY, NICKNAME, ABBREVIATION, STADIUM_TYPE, STATE, DI
 (29, 'Seattle', 'Seahawks', 'SEA', 'Outdoor', 'WA', 'NFC West'),
 (30, 'Tampa Bay', 'Buccaneers', 'TB', 'Outdoor', 'FL', 'NFC South'),
 (31, 'Tennessee', 'Titans', 'TEN', 'Outdoor', 'TN', 'AFC South'),
-(32, 'Washington', 'Commanders', 'WAS', 'Outdoor', 'MD', 'NFC East');
+(32, 'Washington', 'Commanders', 'WSH', 'Outdoor', 'MD', 'NFC East');
