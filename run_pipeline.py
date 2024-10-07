@@ -115,8 +115,7 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
                 weather_df.to_sql('Weather', conn, if_exists='append', index=False)
             conn.commit()
             log.info(f"Completed ETL process for {game_data_df["GAME_ID"].iloc[0]}")
-        break
-            
+                   
 
 
 def run_pipeline(year=None):
