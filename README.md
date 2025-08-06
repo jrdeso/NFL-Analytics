@@ -8,7 +8,7 @@ This project aims to analyze and predict NFL player and team performance using m
 - Initial exploratory analysis started focused on 2023 season. 
 
 # Future:
-- Investigate machine learning models with imported data to predict player and team performance based on past factors (i.e., past games, weather, etc.). Incorporate variety of algorithms (e.g., regression, classification) to find best approach). 
+- Investigate machine learning models with imported data to predict player and team performance based on past factors (i.e., past games, weather, etc.). Incorporate variety of algorithms (e.g., regression, classification) to find best approach. 
 
 
 
