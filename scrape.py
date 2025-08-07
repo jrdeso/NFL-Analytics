@@ -15,10 +15,10 @@ import pandas as pd
 import json
 from datetime import datetime, timedelta
 import time
+import random
 
 
 class Scrape:
-
     def __init__(self):
         """
         Initializes the Scrape class with API credentials and base URL.
@@ -37,6 +37,35 @@ class Scrape:
 
         # Counter to assist in recording API inquirys (to help keep track of limit while pipeline running. )
         self.api_request_count = 0
+
+        # Initiate weather scraping Chrome driver. 
+        self.driver = self._init_driver()
+
+
+    def _init_driver(self):
+        """
+        Initializes and returns a shared Selenium Chrome driver instance in headless mode.
+
+        Returns:
+            webdriver.Chrome: A configured headless Chrome WebDriver.
+        """
+        chrome_options = Options()
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--disable-gpu")
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-dev-shm-usage")
+        chrome_options.add_argument("window-size=1920x1080")
+        chrome_options.add_argument("--log-level=3")  # suppress info/warnings
+        chrome_options.add_argument("--disable-logging")
+        return webdriver.Chrome(options=chrome_options)
+    
+
+    def quit_driver(self):
+        """
+        Shuts down the shared Chrome driver cleanly.
+        Call this once at the end of the pipeline to avoid resource leaks.
+        """
+        self.driver.quit()
 
 
     def check_api_count(self):
@@ -325,31 +354,41 @@ class Scrape:
             0   20220804_JAX@LV  12:53 AM       94 °F     55 °F    27 °%     N     5 °mph    0 °mph  27.54 °in  0.0 °in                     Fair
         """
         self.log.label_log(os.path.basename(__file__), inspect.currentframe().f_code.co_name)
-        try:
-            # Define parameters for URL query
-            state_abbr = self.team_data_map[home_team]['state']
-            city = self.team_data_map[home_team]['city']
-            formatted_date = datetime.strptime(game_date, '%m-%d-%Y').strftime('%Y-%m-%d')
-            url = f"https://www.wunderground.com/history/daily/us/{state_abbr}/{city}/date/{formatted_date}"
 
-            # Define chrome driver and run request (run headless)
-            chrome_options = Options()
-            chrome_options.add_argument("--headless")
-            chrome_options.add_argument("--disable-gpu")  # Disable GPU for headless mode
-            chrome_options.add_argument("--no-sandbox")  # Bypass OS security model
-            chrome_options.add_argument("--disable-dev-shm-usage")  # Overcome limited resource problems
-            chrome_options.add_argument("window-size=1920x1080")  # Set window size to avoid issues
-        
-            driver = webdriver.Chrome(options=chrome_options)
-            driver.get(url)
+        # Define parameters for URL query
+        state_abbr = self.team_data_map[home_team]['state']
+        city = self.team_data_map[home_team]['city']
+        formatted_date = datetime.strptime(game_date, '%m-%d-%Y').strftime('%Y-%m-%d')
+        url = f"https://www.wunderground.com/history/daily/us/{state_abbr}/{city}/date/{formatted_date}"
 
-            # Scrape for tables, and get second table (daily observations table)
-            web_page_tables = WebDriverWait(driver,20).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table")))
-            daily_obs_html = web_page_tables[1].get_attribute('outerHTML')
-            daily_obs_df = pd.read_html(StringIO(daily_obs_html))[0]
-            daily_obs_df.insert(0, 'GAME_ID', game_id)
-            self.log.info(f"Successfully scraped weather data for [{game_id}] from: {url}")
-            return daily_obs_df
+        for attempt in range(3):
+            try:
+                self.driver.set_page_load_timeout(60)
+                self.driver.get(url)
+
+                # wait for page + weather tables to load
+                web_page_tables = WebDriverWait(self.driver, 20).until(
+                    EC.presence_of_all_elements_located((By.CSS_SELECTOR, "table"))
+                )
+
+                # get the second table (daily observations)
+                if len(web_page_tables) < 2:
+                    raise Exception(f"Weather table not found for: {url}")
+
+                daily_obs_html = web_page_tables[1].get_attribute('outerHTML')
+                daily_obs_df = pd.read_html(StringIO(daily_obs_html))[0]
+                daily_obs_df.insert(0, 'GAME_ID', game_id)
+
+                self.log.info(f"Successfully scraped weather data for [{game_id}] from: {url}")
+
+                # Add delay between scrapes to avoid rate limiting during website scraping
+                time.sleep(random.uniform(3, 7))
+                return daily_obs_df
+
+            except Exception as e:
+                self.log.warning(f"[Attempt {attempt+1}/3] Weather scrape failed for {game_id}: {str(e)}")
+                time.sleep(5)
         
-        except (requests.exceptions.RequestException, IndexError, AttributeError) as e:
-            self.log.critical(f"Failed to retrieve data at {url}: {str(e)}")
+        self.log.critical(f"Failed to retrieve data at {url} after 3 attempts.")
+        return None
+            
