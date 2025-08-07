@@ -10,6 +10,7 @@ def save_df(df, filename):
     df.to_csv('Test-DataFrames\\' + filename + '.csv', index=False)
 
 
+
 # Load saved df for testing
 def load_local_df(filename):
     df = pd.read_csv('Test-DataFrames\\' + filename + '.csv', low_memory=False)
@@ -43,7 +44,14 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     # cursor.execute("DELETE FROM Player_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
     # cursor.execute("DELETE FROM Team_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
     # cursor.execute("DELETE FROM Weather WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
+    # # Drop entries in the tables from current year (removes possible duplicate entries for re-runs in pipeline and allows us to update throughout the season)
+    # cursor.execute("DELETE FROM Game WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
+    # cursor.execute("DELETE FROM Player_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
+    # cursor.execute("DELETE FROM Team_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
+    # cursor.execute("DELETE FROM Weather WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
 
+    # conn.commit()
+    # log.info("Reset Game, Player_Game_Stats, Team_Game_Stats, and Weather table in database")
     # conn.commit()
     # log.info("Reset Game, Player_Game_Stats, Team_Game_Stats, and Weather table in database")
 
@@ -54,6 +62,11 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     - Extract into separate general game info, player stats, and home/away team stats
     """
     for game in games_list:
+        # Check if game is already in the Game table in nfl_fantasy.db. If so, we already have its data > move to next game. 
+        if game_already_in_db(conn, game):
+            log.info(f"Not adding {game} to database - already exists. ")
+            continue
+
         # Check if game is already in the Game table in nfl_fantasy.db. If so, we already have its data > move to next game. 
         if game_already_in_db(conn, game):
             log.info(f"Not adding {game} to database - already exists. ")
