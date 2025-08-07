@@ -35,6 +35,8 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     """ Scrape schedule for the given year"""
     schedule = scraper.scrape_nfl_schedule(year)
     games_list = schedule['gameID'].tolist()
+    print(games_list)
+    exit()
 
     # # Drop entries in the tables from current year (removes possible duplicate entries for re-runs in pipeline and allows us to update throughout the season)
     # cursor.execute("DELETE FROM Game WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
@@ -98,6 +100,7 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
             log.info(f"Completed ETL process for {game_data_df["GAME_ID"].iloc[0]}")
 
 
+
 def game_already_in_db(db_conn, game_id):
     """
     Check whether a game with the specified game_id exists in the Game table.
@@ -111,6 +114,7 @@ def game_already_in_db(db_conn, game_id):
     """
     cursor = db_conn.execute("SELECT 1 FROM Game WHERE game_id = ?", (game_id,))
     return cursor.fetchone() is not None
+
 
 
 def run_pipeline(year=None):
@@ -129,7 +133,7 @@ def run_pipeline(year=None):
     print(f"Running pipeline for the year: {year}")
     log.info(f"Running pipeline for the year: {year}")
 
-    etl_players(conn, cursor, scraper, cleaner, log)
+    # etl_players(conn, cursor, scraper, cleaner, log)
     etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log)
 
     print(f"Completed pipeline for the year: {year}")
@@ -143,7 +147,6 @@ def main():
 
     for year in nfl_seasons:
         run_pipeline(year)
-
 
 
 if __name__ == "__main__":
