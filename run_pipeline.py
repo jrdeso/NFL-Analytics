@@ -15,8 +15,6 @@ def load_local_df(filename):
     return df
 
 
-
-
 def etl_players(conn, cursor, scraper, cleaner, log):
     """ Scrape Players"""
     players_df = scraper.scrape_players()
@@ -41,6 +39,8 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     # save_df(schedule, 'schedule')
     # schedule = load_local_df('schedule')
     games_list = schedule['gameID'].tolist()
+    print(games_list)
+    exit()
 
     # with open('2022-games.txt', 'r') as file:
     #     games_list = file.read().splitlines()
@@ -115,7 +115,6 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
                 weather_df.to_sql('Weather', conn, if_exists='append', index=False)
             conn.commit()
             log.info(f"Completed ETL process for {game_data_df["GAME_ID"].iloc[0]}")
-                   
 
 
 def run_pipeline(year=None):
@@ -127,8 +126,6 @@ def run_pipeline(year=None):
     conn = sqlite3.connect('nfl_fantasy.db')
     cursor = conn.cursor()
 
-
-
     # If no year specified, run for current year (season)
     if year is None:
         year = datetime.now().year
@@ -136,12 +133,11 @@ def run_pipeline(year=None):
     print(f"Running pipeline for the year: {year}")
     log.info(f"Running pipeline for the year: {year}")
 
-    etl_players(conn, cursor, scraper, cleaner, log)
+    # etl_players(conn, cursor, scraper, cleaner, log)
     etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log)
 
     print(f"Completed pipeline for the year: {year}")
     log.info(f"Completed pipeline for the year: {year}\n\t")
-
 
     conn.close()
 
@@ -151,7 +147,6 @@ def main():
 
     for year in nfl_seasons:
         run_pipeline(year)
-
 
 
 if __name__ == "__main__":

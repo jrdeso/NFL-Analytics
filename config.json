@@ -365,6 +365,8 @@
             "Rushing.rushTD",
             "Rushing.rushYds",
             "Rushing.rushingTwoPointConversion",
+            "snapCounts.offSnap",
+            "snapCounts.offSnapPct",
             "Defense.fumblesLost"
         ],
     
@@ -391,6 +393,8 @@
             "Rushing.rushTD",
             "Rushing.rushYds",
             "Rushing.rushingTwoPointConversion",
+            "snapCounts.offSnap",
+            "snapCounts.offSnapPct",
             "Defense.fumblesLost"
         ],
 
@@ -424,6 +428,8 @@
             "Rushing.rushTD": "RUSHING_RUSH_TOUCHDOWNS",
             "Rushing.rushYds": "RUSHING_RUSH_YARDS",
             "Rushing.rushingTwoPointConversion": "RUSHING_RUSH_TWO_PT_CNVR",
+            "snapCounts.offSnap": "OFFENSIVE_SNAPS",
+            "snapCounts.offSnapPct": "OFFENSIVE_SNAP_PCT",
             "Defense.fumblesLost": "FUMBLES_LOST"
         },
 
@@ -457,6 +463,8 @@
             "RUSHING_RUSH_TOUCHDOWNS": "INTEGER",
             "RUSHING_RUSH_YARDS": "INTEGER",
             "RUSHING_RUSH_TWO_PT_CNVR": "INTEGER",
+            "OFFENSIVE_SNAPS": "INTEGER",
+            "OFFENSIVE_SNAP_PCT": "REAL",
             "FUMBLES_LOST": "INTEGER"
         }
     },
