@@ -9,20 +9,17 @@ import sqlite3
 def save_df(df, filename):
     df.to_csv('Test-DataFrames\\' + filename + '.csv', index=False)
 
+
 # Load saved df for testing
 def load_local_df(filename):
     df = pd.read_csv('Test-DataFrames\\' + filename + '.csv', low_memory=False)
     return df
 
 
-
-
 def etl_players(conn, cursor, scraper, cleaner, log):
     """ Scrape Players"""
     players_df = scraper.scrape_players()
     players_df = cleaner.clean_players(players_df)
-    # save_df(players_df, 'players_df')
-    # players_df = load_local_df('players_df')
 
     # Drop data in Player table > we do this to get rid of past players out of the league, and also changes to existing players
     cursor.execute("DELETE FROM Player")
@@ -37,25 +34,16 @@ def etl_players(conn, cursor, scraper, cleaner, log):
 def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     """ Scrape schedule for the given year"""
     schedule = scraper.scrape_nfl_schedule(year)
-
-    # save_df(schedule, 'schedule')
-    # schedule = load_local_df('schedule')
     games_list = schedule['gameID'].tolist()
 
-    # with open('2022-games.txt', 'r') as file:
-    #     games_list = file.read().splitlines()
+    # # Drop entries in the tables from current year (removes possible duplicate entries for re-runs in pipeline and allows us to update throughout the season)
+    # cursor.execute("DELETE FROM Game WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
+    # cursor.execute("DELETE FROM Player_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
+    # cursor.execute("DELETE FROM Team_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
+    # cursor.execute("DELETE FROM Weather WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
 
-    # Drop entries in the tables from current year (removes possible duplicate entries for re-runs in pipeline and allows us to update throughout the season)
-    cursor.execute("DELETE FROM Game WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
-    cursor.execute("DELETE FROM Player_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
-    cursor.execute("DELETE FROM Team_Game_Stats WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
-    cursor.execute("DELETE FROM Weather WHERE GAME_ID IN ({seq})".format(seq=','.join(['?']*len(games_list))), games_list)
-
-    conn.commit()
-    log.info("Reset Game, Player_Game_Stats, Team_Game_Stats, and Weather table in database")
-
-    # with open('games_list_subset.txt', 'r') as file:
-    #     games_list = file.read().splitlines()
+    # conn.commit()
+    # log.info("Reset Game, Player_Game_Stats, Team_Game_Stats, and Weather table in database")
 
     """ 
     Scrape game info for the year's games 
@@ -64,6 +52,11 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
     - Extract into separate general game info, player stats, and home/away team stats
     """
     for game in games_list:
+        # Check if game is already in the Game table in nfl_fantasy.db. If so, we already have its data > move to next game. 
+        if game_already_in_db(conn, game):
+            log.info(f"Not adding {game} to database - already exists. ")
+            continue
+
         # Scrape individual game info
         game_info_df = scraper.scrape_game_info(game)
 
@@ -94,18 +87,6 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
             else:
                 weather_flag = True
 
-            # save_df(game_data_df, 'game_data_df')
-            # save_df(home_team_data_df, 'home_team_data_df')
-            # save_df(away_team_data_df, 'away_team_data_df')
-            # save_df(players_stats_df, 'players_stats_df')
-            # save_df(weather_df, 'weather_df')
-
-            # game_data_df = load_local_df('game_data_df')
-            # home_team_data_df = load_local_df('home_team_data_df')
-            # away_team_data_df = load_local_df('away_team_data_df')
-            # players_stats_df = load_local_df('players_stats_df')
-            # weather_df = load_local_df('weather_df')
-
             # load dfs to individual tables
             game_data_df.to_sql('Game', conn, if_exists='append', index=False)
             home_team_data_df.to_sql('Team_Game_Stats', conn, if_exists='append', index=False)
@@ -115,7 +96,21 @@ def etl_seasons_game_data(conn, cursor, year, scraper, cleaner, log):
                 weather_df.to_sql('Weather', conn, if_exists='append', index=False)
             conn.commit()
             log.info(f"Completed ETL process for {game_data_df["GAME_ID"].iloc[0]}")
-                   
+
+
+def game_already_in_db(db_conn, game_id):
+    """
+    Check whether a game with the specified game_id exists in the Game table.
+
+    Args:
+        db_conn (sqlite3.Connection): An active SQLite database connection object.
+        game_id (str or int): The unique identifier of the game to check for.
+
+    Returns:
+        bool: True if the game exists in the database, False otherwise.
+    """
+    cursor = db_conn.execute("SELECT 1 FROM Game WHERE game_id = ?", (game_id,))
+    return cursor.fetchone() is not None
 
 
 def run_pipeline(year=None):
@@ -126,8 +121,6 @@ def run_pipeline(year=None):
     
     conn = sqlite3.connect('nfl_fantasy.db')
     cursor = conn.cursor()
-
-
 
     # If no year specified, run for current year (season)
     if year is None:
@@ -141,7 +134,6 @@ def run_pipeline(year=None):
 
     print(f"Completed pipeline for the year: {year}")
     log.info(f"Completed pipeline for the year: {year}\n\t")
-
 
     conn.close()
 
