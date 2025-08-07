@@ -102,6 +102,10 @@ class Clean:
                 elif len(parts) == 4:
                     stat_category = parts[2] + '.' + parts[3] # e.g., Receiving + . + targets
                 
+                # If found stat isn't included in self.player_data_cols (from config.json), we don't want it > continue to next iteration
+                if stat_category not in self.player_data_cols:
+                    continue
+                
                 # If player isn't in our dataframe yet, add them in
                 if player_id not in players_stats_df['playerID'].values:
                     new_player = pd.DataFrame({'playerID': [player_id], stat_category: game_info_df[fieldname]})
@@ -134,7 +138,6 @@ class Clean:
             players_stats_df = players_stats_df.drop(columns=['Passing.rtg'])
         except KeyError:
             self.log.warning("Couldn't drop teamAbv + Passing.rtg from player_stats_df")
-            pass
 
         # There is a bug with the API for the January 2, 2024 BUF @ CIN game that was cancelled during the game
         # This section accounts for it
@@ -288,7 +291,7 @@ class Clean:
             player_game_stats_df[f'{platform}'] = player_game_stats_df.apply(
                 lambda row: self.calculate_fantasy_points(row, platform), axis=1,
             )
-
+            
         self.log.info("Successfully cleaned player_game_stats_df to load into database. ")
         return player_game_stats_df
 
